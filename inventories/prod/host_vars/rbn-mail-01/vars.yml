@@ -1,0 +1,5 @@
+---
+
+ansible_host: mail-01.rbn.is
+ansible_user: "{{ vault_ansible_user }}"
+ansible_python_interpreter: python3

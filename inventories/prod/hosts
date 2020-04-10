@@ -1,0 +1,35 @@
+[nbg_mail]
+rbn-mail-01
+
+[nbg_web]
+rbn-web-01
+
+[nbg_monitoring]
+rbn-mon-01
+
+# roles
+## mail
+[mail:children]
+nbg_mail
+
+## web
+[web:children]
+nbg_web
+
+## monitoring
+[monitoring:children]
+nbg_monitoring
+
+# hoster
+## hetzner
+[hetzner:children]
+nbg_mail
+nbg_web
+nbg_monitoring
+
+# geos
+## nuremberg
+[nbg:children]
+nbg_mail
+nbg_web
+nbg_monitoring

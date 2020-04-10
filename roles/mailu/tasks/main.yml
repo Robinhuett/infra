@@ -1,0 +1,348 @@
+---
+
+- name: Remove conflicting packages
+  become: yes
+  apt:
+    autoremove: yes
+    purge: yes
+    name:
+    - exim4
+    - exim4-base
+    state: absent
+  tags:
+  - dependencies
+
+- name: Ensure directory for mailu exists
+  become: yes
+  file:
+    path: /var/data/mailu
+    state: directory
+
+- name: Make sure mailu.env file is present
+  become: yes
+  template:
+    src: mailu.env.j2
+    dest: /var/data/mailu.env
+  register: mailu_env
+
+- name: Create docker network for mailu
+  become: yes
+  docker_network:
+    name: mailu
+    driver: bridge
+    ipam_config:
+    - subnet: 192.168.203.0/24
+
+# networks_cli_compatible is set because auf deprecation in ansible 2.12 and not needed after this
+- name: Start redis container
+  become: yes
+  docker_container:
+    name: redis
+    image: redis:alpine
+    volumes:
+    - /var/data/mailu/redis:/data
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start mailu admin container
+  become: yes
+  docker_container:
+    name: admin
+    image: mailu/admin:1.7
+    volumes:
+    - /var/data/mailu/data:/data
+    - /var/data/mailu/dkim:/dkim
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start mailu imap container
+  become: yes
+  docker_container:
+    name: imap
+    image: mailu/dovecot:1.7
+    volumes:
+    - /var/data/mailu/mail:/mail
+    - /var/data/mailu/overrides:/overrides
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start mailu smtp container
+  become: yes
+  docker_container:
+    name: smtp
+    image: mailu/postfix:1.7
+    volumes:
+    - /var/data/mailu/mailqueue:/queue
+    - /var/data/mailu/overrides:/overrides
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start mailu antispam container
+  become: yes
+  docker_container:
+    name: antispam
+    image: mailu/rspamd:1.7
+    volumes:
+    - /var/data/mailu/filter:/var/lib/rspamd
+    - /var/data/mailu/dkim:/dkim
+    - /var/data/mailu/overrides/rspamd:/etc/rspamd/override.d
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start mailu antivirus container
+  become: yes
+  docker_container:
+    name: antivirus
+    image: mailu/clamav:1.7
+    volumes:
+    - /var/data/mailu/filter:/data
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start mailu webdav container
+  become: yes
+  docker_container:
+    name: webdav
+    image: mailu/radicale:1.7
+    volumes:
+    - /va/data/mailu/dav:/data
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start mailu fetchmail container
+  become: yes
+  docker_container:
+    name: fetchmail
+    image: mailu/fetchmail:1.7
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start mailu webmail container
+  become: yes
+  docker_container:
+    name: webmail
+    image: mailu/roundcube:1.7
+    volumes:
+    - /var/data/mailu/webmail:/data
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Start front service container
+  become: yes
+  docker_container:
+    name: front
+    image: mailu/nginx:1.7
+    volumes:
+    - /var/data/mailu/certs:/certs
+    - /var/data/mailu/overrides/nginx:/overrides
+    published_ports:
+    - "{{ ansible_default_ipv4.address }}:80:80"
+    - "{{ ansible_default_ipv4.address }}:443:443"
+    - "{{ ansible_default_ipv4.address }}:25:25"
+    - "{{ ansible_default_ipv4.address }}:465:465"
+    - "{{ ansible_default_ipv4.address }}:587:587"
+    - "{{ ansible_default_ipv4.address }}:110:110"
+    - "{{ ansible_default_ipv4.address }}:995:995"
+    - "{{ ansible_default_ipv4.address }}:143:143"
+    - "{{ ansible_default_ipv4.address }}:993:993"
+    networks:
+    - name: mailu
+    networks_cli_compatible: yes
+    env_file: /var/data/mailu.env
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
+
+- name: Setup noreply mail user # noqa 301
+  become: yes
+  command: docker exec admin flask mailu user {{ mail.user.noreply.name }} {{ mail.domain.apex }} '{{ mail.user.noreply.pass }}'
+
+- name: Ensure all MX DNS records are set
+  inwx.collection.dns:
+    domain: "{{ item }}"
+    type: MX
+    priority: 9
+    value: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
+    ttl: 86400
+    solo: yes
+    state: present
+    username: "{{ inwx_user }}"
+    password: "{{ inwx_pass }}"
+  loop: "{{ mail.domains }}"
+  tags:
+  - dns
+
+- name: Ensure all SPF DNS records are set
+  inwx.collection.dns:
+    domain: "{{ item }}"
+    type: TXT
+    value: v=spf1 a mx ~all
+    ttl: 3600
+    state: present
+    username: "{{ inwx_user }}"
+    password: "{{ inwx_pass }}"
+  loop: "{{ mail.domains }}"
+  tags:
+  - dns
+
+- name: Ensure all _dmarc DNS records are set
+  inwx.collection.dns:
+    domain: "{{ item }}"
+    type: TXT
+    record: _dmarc
+    value: v=DMARC1; p=none; pct=100; rua=mailto:postmaster@rbn.is; ruf=mailto:postmaster@rbn.is; adkim=s; aspf=r
+    ttl: 3600
+    solo: yes
+    state: present
+    username: "{{ inwx_user }}"
+    password: "{{ inwx_pass }}"
+  loop: "{{ mail.domains }}"
+  tags:
+  - dns
+
+- name: Ensure all autodiscover DNS records are set
+  inwx.collection.dns:
+    domain: "{{ item }}"
+    type: CNAME
+    record: autodiscover
+    value: "{{ mail.domain }}"
+    ttl: 3600
+    solo: yes
+    state: present
+    username: "{{ inwx_user }}"
+    password: "{{ inwx_pass }}"
+  loop: "{{ mail.domains }}"
+  tags:
+  - dns
+
+- name: Ensure all autoconfig DNS records are set
+  inwx.collection.dns:
+    domain: "{{ item }}"
+    type: CNAME
+    record: autoconfig
+    value: "{{ mail.domain }}"
+    ttl: 3600
+    solo: yes
+    state: present
+    username: "{{ inwx_user }}"
+    password: "{{ inwx_pass }}"
+  loop: "{{ mail.domains }}"
+  tags:
+  - dns
+
+# Note on DKIM DNS records:
+# Currently it's not possible to elegantly generate those via cli.
+
+- name: Ensure Reverse DNS for IPv4 is set
+  hcloud_rdns:
+    api_token: "{{ hetzner_api_token }}"
+    dns_ptr: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
+    ip_address: "{{ ansible_default_ipv4.address }}"
+    server: "{{ inventory_hostname }}"
+  delegate_to: localhost
+  when:
+  - "'hetzner' in group_names"

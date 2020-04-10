@@ -1,0 +1,8 @@
+---
+
+- import_playbook: infrastructure.yml
+- import_playbook: common.yml
+- import_playbook: monitoring.yml
+- import_playbook: web.yml
+- import_playbook: mail.yml
+- import_playbook: backup.yml

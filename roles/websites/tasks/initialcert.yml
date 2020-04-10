@@ -1,0 +1,122 @@
+---
+
+- name: Check for gTLD+1 cert file
+  become: yes
+  stat:
+    path: /etc/letsencrypt/live/{{ item.0.apex }}/fullchain.pem
+  when:
+  - item.1.name | length == 0
+  register: certfile
+  check_mode: no
+
+- name: Check for subdomain cert file
+  become: yes
+  stat:
+    path: /etc/letsencrypt/live/{{ item.1.name }}.{{ item.0.apex }}/fullchain.pem
+  when:
+  - item.1.name | length > 0
+  register: certfilesub
+  check_mode: no
+
+- name: Ensure gTLD+1 sites are available
+  become: yes
+  template:
+    src: nginx-site-apex-cert.j2
+    dest: /etc/nginx/sites-available/{{ item.0.apex }}-cert.conf
+  when:
+  - item.1.name | length == 0
+  - not certfile.stat.exists
+  notify: Reload nginx
+
+- name: Ensure subdomain sites are available
+  become: yes
+  template:
+    src: nginx-site-sub-cert.j2
+    dest: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}-cert.conf
+  when:
+  - item.1.name | length > 0
+  - not certfilesub.stat.exists
+  notify: Reload nginx
+
+- name: Enable gTLD+1 sites
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/{{ item.0.apex }}-cert.conf
+    dest: /etc/nginx/sites-enabled/{{ item.0.apex }}-cert.conf
+    state: link
+  when:
+  - item.1.name | length == 0
+  - not certfile.stat.exists
+  - not ansible_check_mode
+  notify: Reload nginx
+
+- name: Enable subdomain sites
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}-cert.conf
+    dest: /etc/nginx/sites-enabled/{{ item.1.name }}.{{ item.0.apex }}-cert.conf
+    state: link
+  when:
+  - item.1.name | length > 0
+  - not certfilesub.stat.exists
+  - not ansible_check_mode
+  notify: Reload nginx
+
+- name: Fire handlers
+  meta: flush_handlers
+
+- name: Obtain certificate for gTLD+1 sites
+  become: yes
+  command: >
+    certbot certonly --agree-tos --non-interactive --email {{ letsencrypt_mail }}
+    --webroot -w /var/lib/letsencrypt/ -d {{ item.0.apex }} -d www.{{ item.0.apex }}
+  when:
+  - item.1.name | length == 0
+  - env != "dev"
+  - not certfile.stat.exists
+
+- name: Obtain certificate for subdomain sites
+  become: yes
+  command: >
+    certbot certonly --agree-tos --non-interactive --email {{ letsencrypt_mail }}
+    --webroot -w /var/lib/letsencrypt/ -d {{ item.1.name }}.{{ item.0.apex }}
+  when:
+  - item.1.name | length > 0
+  - env != "dev"
+  - not certfilesub.stat.exists
+
+- name: Remove Cert-Only site-enabled config for gTLD+1
+  become: yes
+  file:
+    path: /etc/nginx/sites-enabled/{{ item.0.apex }}-cert.conf
+    state: absent
+  when:
+  - item.1.name | length == 0
+  - not ansible_check_mode
+
+- name: Remove Cert-Only site-available config for gTLD+1
+  become: yes
+  file:
+    path: /etc/nginx/sites-available/{{ item.0.apex }}-cert.conf
+    state: absent
+  when:
+  - item.1.name | length == 0
+  - not ansible_check_mode
+
+- name: Remove Cert-Only site-enabled config for subdomain
+  become: yes
+  file:
+    path: /etc/nginx/sites-enabled/{{ item.1.name }}.{{ item.0.apex }}-cert.conf
+    state: absent
+  when:
+  - item.1.name | length > 0
+  - not ansible_check_mode
+
+- name: Remove Cert-Only site-available config for subdomain
+  become: yes
+  file:
+    path: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}-cert.conf
+    state: absent
+  when:
+  - item.1.name | length > 0
+  - not ansible_check_mode

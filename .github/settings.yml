@@ -11,8 +11,14 @@ repository:
 
 labels:
   - name: update
+    description: An update of some sort is needed
     color: 0366d6
   - name: security
+    description: Update do prevent pwnage
     color: d73a4a
   - name: feature
+    description: A new feature
     color: 008672
+  - name: docs
+    description: Documentation
+    color: e3ed5e

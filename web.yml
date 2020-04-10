@@ -1,0 +1,12 @@
+---
+
+- hosts:
+  - web
+
+  roles:
+  - docker
+  - watchtower
+  - nginx
+  - websites
+  - role: nextcloud
+    when: nextcloud is defined

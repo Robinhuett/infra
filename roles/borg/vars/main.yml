@@ -1,0 +1,10 @@
+
+ssh_public_keys: |
+  {%- set o=[] %}
+  {%- for i in ansible_play_batch %}
+    {%- if hostvars[i].ssh_public_key is defined %}
+      {%- if o.append({'key': hostvars[i].ssh_public_key, 'host': inventory_hostname}) %}
+      {%- endif %}
+    {%- endif %}
+  {%- endfor %}
+  {{ o }}

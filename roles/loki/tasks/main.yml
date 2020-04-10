@@ -1,0 +1,55 @@
+---
+
+- name: Ensure directory for loki exists
+  become: yes
+  file:
+    path: /var/data/loki
+    owner: "10001"
+    state: directory
+
+- name: Create htpasswd file for basic auth to loki
+  become: yes
+  htpasswd:
+    path: /var/data/loki/.htpasswd
+    name: "{{ loki.user }}"
+    password: "{{ loki.pass }}"
+    owner: root
+    group: root
+
+- name: Copy loki config to target system
+  become: yes
+  copy:
+    src: config.yml
+    dest: /var/data/loki/config.yml
+    owner: "10001"
+    group: root
+
+- name: Start loki docker container
+  become: yes
+  docker_container:
+    name: loki_01
+    image: grafana/loki:1.5.0
+    command: -config.file=/loki/config.yml
+    volumes:
+    - /var/data/loki:/loki
+    published_ports:
+    - 127.0.0.1:3100:3100
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+
+- name: Add loki as datasource to grafana
+  community.grafana.grafana_datasource:
+    name: ds-loki
+    grafana_url: https://{{ grafana.domain.sub }}.{{ grafana.domain.apex }}
+    grafana_user: "{{ grafana.admin.user }}"
+    grafana_password: "{{ grafana.admin.pass }}"
+    org_id: "1"
+    ds_type: "loki"
+    ds_url: "https://{{ loki.domain.sub }}.{{ loki.domain.apex }}"
+    basic_auth_user: "{{ loki.user }}"
+    basic_auth_password: "{{ loki.pass }}"

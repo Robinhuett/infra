@@ -1,0 +1,36 @@
+---
+
+hetzner_api_token: "{{ vault_hetzner_api_token }}"
+
+# default values for all hetzner nodes
+location: nbg1
+image: debian-10
+server_type: cx11
+ssh_keys:
+- rbn@rbn-notebook-macos
+user_data: |
+  #cloud-config
+
+  disable_root: 1
+  ssh_pwauth: 0
+
+  # Add users
+  users:
+  - name: ansible
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+    - {{ vault_hetzner_user_ansible_key }}
+  - name: rbn
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+    - {{ vault_hetzner_user_rbn_key }}
+
+  # Set timezone
+  timezone: Europe/Berlin
+
+  # Common packages
+  packages:
+  - ntp
+  - vim

@@ -1,0 +1,64 @@
+---
+
+- name: Ensure directory for db exists
+  become: yes
+  file:
+    path: /var/data/nextcloud/db
+    state: directory
+
+- name: Start nextcloud db container
+  become: yes
+  docker_container:
+    name: nextcloud_db_01
+    image: postgres:latest
+    volumes:
+    - /var/data/nextcloud/db:/var/lib/postgresql/data
+    env:
+      POSTGRES_DB: "{{ nextcloud.db.name }}"
+      POSTGRES_USER: "{{ nextcloud.db.user }}"
+      POSTGRES_PASSWORD: "{{ nextcloud.db.pass }}"
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+
+- name: Ensure directory for nextcloud files exists
+  become: yes
+  file:
+    path: /var/data/nextcloud/app
+    state: directory
+
+- name: Start nextcloud app container
+  become: yes
+  docker_container:
+    name: nextcloud_app_01
+    image: nextcloud:latest
+    published_ports:
+    - 127.0.0.1:6500:80
+    volumes:
+    - /var/data/nextcloud/app:/var/www/html
+    links:
+    - nextcloud_db_01
+    env:
+      POSTGRES_DB: "{{ nextcloud.db.name }}"
+      POSTGRES_USER: "{{ nextcloud.db.user }}"
+      POSTGRES_PASSWORD: "{{ nextcloud.db.pass }}"
+      POSTGRES_HOST: nextcloud_db_01
+      NEXTCLOUD_ADMIN_USER: "{{ nextcloud.admin.user }}"
+      NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud.admin.pass }}"
+      SMTP_HOST: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
+      SMTP_SECURE: ssl
+      SMTP_PORT: "465"
+      SMTP_NAME: "{{ mail.user.noreply.name }}"
+      SMTP_PASSWORD: "{{ mail.user.noreply.pass }}"
+      SMTP_FROM_ADDRESS: no_reply+nextcloud@rbn.is
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started

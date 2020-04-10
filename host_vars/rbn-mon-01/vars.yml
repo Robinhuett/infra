@@ -1,0 +1,41 @@
+---
+
+grafana:
+  domain:
+    apex: rbn.is
+    sub: stats
+  admin:
+    user: "{{ vault_grafana_admin_user }}"
+    pass: "{{ vault_grafana_admin_pass }}"
+  user:
+    user: "{{ vault_grafana_user_user }}"
+    pass: "{{ vault_grafana_user_pass }}"
+    name: "{{ vault_grafana_user_name }}"
+    mail: "{{ vault_grafana_user_mail }}"
+
+domains:
+- apex: "{{ grafana.domain.apex }}"
+  subs:
+  - name: mon-01
+  - name: "{{ grafana.domain.sub }}"
+    csp: "default-src *; script-src 'unsafe-eval' 'unsafe-inline' *; style-src 'unsafe-inline' *; img-src data: *; font-src data: *"
+    nginx_conf: |
+      location / {
+        proxy_pass http://localhost:3000;
+      }
+  - name: "{{ loki.domain.sub }}"
+    nginx_conf: |
+      location / {
+        auth_basic "Grafana Loki";
+        auth_basic_user_file /var/data/loki/.htpasswd;
+
+        proxy_pass http://localhost:3100;
+      }
+  - name: "{{ prometheus.domain.sub }}"
+    nginx_conf: |
+      location / {
+        auth_basic "Prometheus";
+        auth_basic_user_file /var/data/prometheus/.htpasswd;
+
+        proxy_pass http://localhost:9090;
+      }

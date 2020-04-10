@@ -1,0 +1,18 @@
+---
+
+- hosts:
+  - monitoring
+
+  roles:
+  - docker
+  - nginx
+  - grafana
+  - loki
+  - prometheus
+  - websites
+
+- hosts:
+  - all
+
+  roles:
+  - exporter

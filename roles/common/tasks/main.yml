@@ -1,0 +1,49 @@
+---
+
+- name: Ensure locale en_US.UTF-8 locale is present
+  become: yes
+  locale_gen:
+    name: en_US.UTF-8
+    state: present
+
+- name: Ensure the timezone is set to Europe/Berlin
+  become: yes
+  timezone:
+    name: Europe/Berlin
+
+- name: Update apt cache
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: Upgrade all packages
+  become: yes
+  apt:
+    upgrade: yes
+
+- name: Autoremove not needed packages
+  become: yes
+  apt:
+    autoremove: yes
+
+- name: Install common packages
+  become: yes
+  apt:
+    name:
+    - unzip
+    state: present
+  check_mode: no
+
+- name: Ensure pip3 is available
+  become: yes
+  apt:
+    name:
+    - python3
+    - python3-pip
+    state: present
+  check_mode: no
+
+- name: Install python-apt to check for installed packages
+  pip:
+    name: python-apt
+  check_mode: no

@@ -1,0 +1,11 @@
+---
+
+- name: Start watchtower container
+  become: yes
+  docker_container:
+    name: watchtower_01
+    image: containrrr/watchtower:latest
+    volumes: /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup
+    restart_policy: always
+    state: started

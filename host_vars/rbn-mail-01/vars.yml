@@ -1,0 +1,20 @@
+---
+
+mailu:
+  secret_key: "{{ vault_mailu_secret_key }}"
+  domain:
+    apex: "{{ mail.domain.apex }}"
+    sub: "{{ mail.domain.sub }}"
+  admin:
+    user: "{{ vault_mailu_admin_user }}"
+    pass: "{{ vault_mailu_admin_pass }}"
+
+postgresql:
+  pass: "{{ vault_postgresql_pass }}"
+
+# The primary mail domain has to be at the top
+domains:
+- apex: "{{ mailu.domain.apex }}"
+  subs:
+  - name: mail-01
+  - name: "{{ mailu.domain.sub }}"

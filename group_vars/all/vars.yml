@@ -1,0 +1,55 @@
+---
+
+inwx_user: "{{ vault_inwx_user }}"
+inwx_pass: "{{ vault_inwx_pass }}"
+
+letsencrypt_mail: "{{ vault_letsencrypt_mail }}"
+
+backup_locations:
+- /var/data/
+
+log_locations:
+  static:
+  - name: varlogs
+    path: /var/log/*log
+  - name: nginx
+    path: /var/log/nginx/*log
+
+mail:
+  domain:
+    apex: rbn.is
+    sub: mail
+  domains:
+  - rbn.is
+  - tripp.xyz
+  - narf.dev
+  - 3pif.de
+  user:
+    noreply:
+      name: "{{ vault_mail_user_noreply_name }}"
+      pass: "{{ vault_mail_user_noreply_pass }}"
+
+borg:
+  host: "{{ vault_borg_host }}"
+  host_key: "{{ vault_borg_host_key }}"
+  user: "{{ vault_borg_user }}"
+  retention_policy:
+    keep_hourly: 6
+    keep_daily: 7
+    keep_weekly: 4
+    keep_monthly: 12
+    keep_yearly: -1
+
+loki:
+  domain:
+    apex: rbn.is
+    sub: loki
+  user: "{{ vault_loki_user }}"
+  pass: "{{ vault_loki_pass }}"
+
+prometheus:
+  domain:
+    apex: rbn.is
+    sub: prom
+  user: "{{ vault_prometheus_user }}"
+  pass: "{{ vault_prometheus_pass }}"

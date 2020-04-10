@@ -1,0 +1,70 @@
+---
+
+- name: Ensure docker dependencies are installed
+  become: yes
+  apt:
+    name:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+    state: present
+  check_mode: no
+  tags:
+  - dependencies
+
+- name: Add docker inc apt key
+  become: yes
+  apt_key:
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+  check_mode: no
+  tags:
+  - dependencies
+
+- name: Add docker apt repo
+  become: yes
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable
+    state: present
+  check_mode: no
+  tags:
+  - dependencies
+
+- name: Install docker
+  become: yes
+  apt:
+    name:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    update_cache: yes
+    state: present
+  check_mode: no
+  tags:
+  - dependencies
+
+- name: Install docker python module
+  become: yes
+  pip:
+    name:
+    - docker
+  check_mode: no
+  tags:
+  - dependencies
+
+# Use command till docker plugins are supported in ansible
+- name: Determine if loki docker plugin is installed
+  become: yes
+  shell: set -o pipefail && docker plugin ls | grep loki
+  register: loki_plugin
+  changed_when: no
+  failed_when: no
+  check_mode: no
+
+- name: Install loki docker plugin
+  become: yes
+  command: docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
+  when: loki_plugin.stdout | bool

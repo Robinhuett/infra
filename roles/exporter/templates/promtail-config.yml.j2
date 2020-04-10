@@ -1,0 +1,23 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: https://{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+    basic_auth:
+      username: {{ loki.user }}
+      password: {{ loki.pass }}
+
+scrape_configs:
+- job_name: system
+  pipeline_stages:
+  static_configs:
+{% for location in log_locations.static %}
+  - labels:
+      job: {{ location.name }}
+      host: {{ inventory_hostname }}
+      __path__: {{ location.path }}
+{% endfor %}

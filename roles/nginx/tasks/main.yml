@@ -1,0 +1,77 @@
+---
+
+- name: Ensure nginx is installed
+  become: yes
+  apt:
+    name:
+    - nginx
+    - certbot
+    - openssl
+    - python3-passlib
+    state: present
+  check_mode: no
+
+- name: Generate DH Parameters
+  become: yes
+  openssl_dhparam:
+    path: /etc/ssl/certs/dhparam.pem
+  when:
+  - env != "dev"
+
+- name: Ensure directory for acme challange exists
+  become: yes
+  file:
+    path: /var/lib/letsencrypt/.well-known
+    group: www-data
+    mode: g+s
+    state: directory
+
+- name: Copy letsencrypt snippet
+  become: yes
+  copy:
+    src: letsencrypt.conf
+    dest: /etc/nginx/snippets/letsencrypt.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copy ssl snippet
+  become: yes
+  copy:
+    src: ssl.conf
+    dest: /etc/nginx/snippets/ssl.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copy header snippet
+  become: yes
+  copy:
+    src: header.conf
+    dest: /etc/nginx/snippets/header.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Remove default nginx vhost config file
+  become: yes
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Restart nginx
+
+- name: Ensure nginx service is running and enabled
+  become: yes
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Ensure cron job exists to renew letsencrypt certs
+  become: yes
+  cron:
+    name: Renew letsencrypt certs
+    minute: '0'
+    hour: '*/12'
+    user: root
+    job: test -x certbot -a \! -d /run/systemd/system && perl -e 'sleep int(rand(3600))' && certbot -q renew --renew-hook "systemctl reload nginx"

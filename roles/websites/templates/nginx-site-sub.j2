@@ -1,0 +1,48 @@
+server {
+  listen 80;
+  listen [::]:80;
+  server_name {{ item.1.name }}.{{ item.0.apex }};
+
+  include snippets/header.conf;
+  include snippets/letsencrypt.conf;
+
+  {% if env != "dev" %}
+  return 302 https://$host$request_uri;
+  {% else %}
+  {% if item.1.csp is not defined %}
+  add_header Content-Security-Policy "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'";
+  {% else %}
+  add_header Content-Security-Policy "{{ item.1.csp }}";
+  {% endif %}
+
+  {{ item.1.nginx_conf }}
+
+  {% endif %}
+}
+
+{% if env != "dev" %}
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name {{ item.1.name }}.{{ item.0.apex }};
+
+  if ($scheme != "https") {
+    return 302 https://$host$request_uri;
+  }
+
+  ssl_certificate /etc/letsencrypt/live/{{ item.1.name }}.{{ item.0.apex }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ item.1.name }}.{{ item.0.apex }}/privkey.pem;
+  ssl_trusted_certificate /etc/letsencrypt/live/{{ item.1.name }}.{{ item.0.apex }}/chain.pem;
+  include snippets/ssl.conf;
+  include snippets/letsencrypt.conf;
+  include snippets/header.conf;
+
+  {% if item.1.csp is not defined %}
+  add_header Content-Security-Policy "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'";
+  {% else %}
+  add_header Content-Security-Policy "{{ item.1.csp }}";
+  {% endif %}
+
+  {{ item.1.nginx_conf }}
+}
+{% endif %}

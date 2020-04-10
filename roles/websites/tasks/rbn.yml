@@ -1,0 +1,11 @@
+---
+
+- name: Start rbnis container
+  become: yes
+  docker_container:
+    name: rbnis_01
+    image: rbnt/rbnis:latest
+    published_ports:
+    - 127.0.0.1:6503:80
+    restart_policy: always
+    state: started

@@ -1,0 +1,63 @@
+---
+
+- name: Ensure directory for prometheus config exists
+  become: yes
+  file:
+    path: /var/data/prometheus
+    state: directory
+
+- name: Create htpasswd file for basic auth to loki
+  become: yes
+  htpasswd:
+    path: /var/data/prometheus/.htpasswd
+    name: "{{ prometheus.user }}"
+    password: "{{ prometheus.pass }}"
+    owner: root
+    group: root
+
+- name: Copy prometheus config
+  become: yes
+  template:
+    src: prometheus.yml.j2
+    dest: /var/data/prometheus/prometheus.yml
+  register: prometheus_config
+
+- name: Start prometheus docker container
+  become: yes
+  docker_container:
+    name: prometheus_01
+    image: prom/prometheus:v2.18.1
+    volumes:
+    - /var/data/prometheus:/etc/prometheus
+    published_ports:
+    - 127.0.0.1:9090:9090
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+  register: prometheus_container
+
+- name: Restart Prometheus # noqa 503
+  become: yes
+  docker_container:
+    name: prometheus_01
+    restart: yes
+    state: started
+  when:
+  - prometheus_config.changed
+  - not prometheus_container.changed
+
+- name: Add prometheus as datasource to grafana
+  community.grafana.grafana_datasource:
+    name: ds-prometheus
+    grafana_url: https://{{ grafana.domain.sub }}.{{ grafana.domain.apex }}
+    grafana_user: "{{ grafana.admin.user }}"
+    grafana_password: "{{ grafana.admin.pass }}"
+    org_id: "1"
+    ds_type: "prometheus"
+    ds_url: "https://{{ prometheus.domain.sub }}.{{ prometheus.domain.apex }}"
+    basic_auth_user: "{{ prometheus.user }}"
+    basic_auth_password: "{{ prometheus.pass }}"

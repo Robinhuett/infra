@@ -1,0 +1,75 @@
+---
+
+- include_tasks: initialcert.yml
+  loop: "{{ domains|subelements('subs') }}"
+  when:
+  - item.1.nginx_conf is defined
+
+- name: Ensure gTLD+1 sites are available
+  become: yes
+  template:
+    src: nginx-site-apex.j2
+    dest: /etc/nginx/sites-available/{{ item.0.apex }}.conf
+  loop: "{{ domains|subelements('subs') }}"
+  when:
+  - item.1.nginx_conf is defined
+  - item.1.name | length == 0
+  notify: Reload nginx
+  loop_control:
+    label: "{{ item.0.apex }}"
+
+- name: Ensure subdomain sites are available
+  become: yes
+  template:
+    src: nginx-site-sub.j2
+    dest: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}.conf
+  loop: "{{ domains|subelements('subs') }}"
+  when:
+  - item.1.nginx_conf is defined
+  - item.1.name | length > 0
+  loop_control:
+    label: "{{ item.1.name }}.{{ item.0.apex }}"
+  notify: Reload nginx
+
+- name: Enable gTLD+1 sites
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/{{ item.0.apex }}.conf
+    dest: /etc/nginx/sites-enabled/{{ item.0.apex }}.conf
+    state: link
+  loop: "{{ domains|subelements('subs') }}"
+  when:
+  - item.1.nginx_conf is defined
+  - item.1.name | length == 0
+  - not ansible_check_mode
+  loop_control:
+    label: "{{ item.0.apex }}"
+  notify: Reload nginx
+
+- name: Enable subdomain sites
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}.conf
+    dest: /etc/nginx/sites-enabled/{{ item.1.name }}.{{ item.0.apex }}.conf
+    state: link
+  loop: "{{ domains|subelements('subs') }}"
+  when:
+  - item.1.nginx_conf is defined
+  - item.1.name | length > 0
+  - not ansible_check_mode
+  loop_control:
+    label: "{{ item.1.name }}.{{ item.0.apex }}"
+  notify: Reload nginx
+
+- include_tasks: narf.yml
+  when:
+  - "'web' in group_names"
+  - domains | selectattr('apex', 'contains', 'narf.dev') | list | length > 0
+- include_tasks: 3pif.yml
+  when:
+  - "'web' in group_names"
+  - domains | selectattr('apex', 'contains', '3pif.de') | list | length > 0
+- include_tasks: rbn.yml
+  when:
+  - "'web' in group_names"
+  - domains | selectattr('apex', 'contains', 'rbn.is') | list | length > 0

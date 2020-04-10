@@ -1,0 +1,57 @@
+---
+
+nextcloud:
+  domain:
+    apex: rbn.is
+    sub: files
+  csp: "default-src *; script-src 'unsafe-eval' 'unsafe-inline' *; style-src 'unsafe-inline' *; img-src data: *; font-src data: *"
+  nginx_conf: |
+    client_max_body_size 0;
+
+    location / {
+      proxy_pass http://localhost:6500;
+    }
+  db:
+    name: nextcloud
+    user: "{{ vault_nextcloud_db_user }}"
+    pass: "{{ vault_nextcloud_db_pass }}"
+  admin:
+    user: "{{ vault_nextcloud_admin_user }}"
+    pass: "{{ vault_nextcloud_admin_pass }}"
+
+domains:
+- apex: tripp.xyz
+  subs:
+  - name: ""
+    nginx_conf: |
+      return 302 https://rbn.is;
+  - name: "*"
+- apex: narf.dev
+  subs:
+  - name: ""
+    nginx_conf: |
+      location / {
+        proxy_pass http://localhost:6501;
+      }
+  - name: "*"
+- apex: 3pif.de
+  subs:
+  - name: ""
+    nginx_conf: |
+      location / {
+        proxy_pass http://localhost:6502;
+      }
+  - name: "*"
+- apex: rbn.is
+  subs:
+  - name: web-01
+  - name: ""
+    nginx_conf: |
+      location / {
+        proxy_pass http://localhost:6503;
+      }
+  - name: "*"
+  - name: "{{ nextcloud.domain.sub }}"
+    csp: "{{ nextcloud.csp }}"
+    skip_dns_config: yes
+    nginx_conf: "{{ nextcloud.nginx_conf }}"

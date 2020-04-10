@@ -1,0 +1,5 @@
+---
+
+ansible_host: 192.168.56.104
+ansible_user: "{{ vault_ansible_user }}"
+ansible_python_interpreter: python3

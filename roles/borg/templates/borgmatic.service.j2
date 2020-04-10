@@ -1,0 +1,24 @@
+[Unit]
+Description=borgmatic backup
+Wants=network-online.target
+After=network-online.target
+ConditionACPower=true
+
+[Service]
+Type=oneshot
+
+# Lower CPU and I/O priority
+Nice=19
+CPUSchedulingPolicy=batch
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+IOWeight=100
+
+Restart=no
+
+# Prevent rate limiting of borgmatic log events
+LogRateLimitIntervalSec=0
+
+# Delay start to prevent backups running during boot
+ExecStartPre=sleep 1m
+ExecStart=systemd-inhibit --who="borgmatic" --why="Prevent interrupting scheduled backup" /root/.local/bin/borgmatic --syslog-verbosity 1

@@ -1,0 +1,8 @@
+server {
+  listen 80;
+  listen [::]:80;
+  server_name {{ item.0.apex }} www.{{ item.0.apex }};
+
+  include snippets/header.conf;
+  include snippets/letsencrypt.conf;
+}

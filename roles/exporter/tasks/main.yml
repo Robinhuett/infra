@@ -1,0 +1,4 @@
+---
+
+- include_tasks: promtail.yml
+- include_tasks: nodeexporter.yml

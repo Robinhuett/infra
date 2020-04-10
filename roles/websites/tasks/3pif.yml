@@ -1,0 +1,11 @@
+---
+
+- name: Start 3pif-web container
+  become: yes
+  docker_container:
+    name: 3pif-web_01
+    image: rbnt/3pif-web:latest
+    published_ports:
+    - 127.0.0.1:6502:80
+    restart_policy: always
+    state: started

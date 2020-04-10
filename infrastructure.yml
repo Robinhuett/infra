@@ -1,0 +1,102 @@
+---
+
+- hosts:
+  - hetzner
+
+  connection: local
+  gather_facts: no
+
+  tasks:
+  - name: Ensure hcloud-python is installed
+    pip:
+      name:
+      - hcloud
+    tags:
+    - dependencies
+
+  - name: Ensure all hetzner instances are up and running
+    hcloud_server:
+      api_token: "{{ hetzner_api_token }}"
+      name: "{{ inventory_hostname }}"
+      location: "{{ location }}"
+      image: "{{ image }}"
+      server_type: "{{ server_type }}"
+      user_data: "{{ user_data }}"
+      ssh_keys: "{{ ssh_keys }}"
+      state: present
+    register: hetznernode
+
+  - name: Ensure all relevant DNS entries are set for IPv4
+    inwx.collection.dns:
+      domain: "{{ item.0.apex }}"
+      type: A
+      record: "{{ item.1.name }}"
+      value: "{{ hetznernode.hcloud_server.ipv4_address }}"
+      ttl: 3600
+      solo: yes
+      state: present
+      username: "{{ inwx_user }}"
+      password: "{{ inwx_pass }}"
+    loop: "{{ domains|subelements('subs') }}"
+    tags:
+    - dns
+    when:
+    - hetznernode.hcloud_server.ipv4_address is defined
+    - item.1.skip_dns_config is undefined
+    register: dns_entries
+
+  - name: Ensure www CNAME is set for apex domains
+    inwx.collection.dns:
+      domain: "{{ item.0.apex }}"
+      type: CNAME
+      record: "www"
+      value: "{{ item.0.apex }}"
+      ttl: 3600
+      solo: yes
+      state: present
+      username: "{{ inwx_user }}"
+      password: "{{ inwx_pass }}"
+    loop: "{{ domains|subelements('subs') }}"
+    tags:
+    - dns
+    when:
+    - item.1.skip_dns_config is undefined
+    - item.1.name | length == 0
+    register: dns_entries
+
+  - name: Use IP to connect to host
+    set_fact:
+      ansible_host: "{{ hetznernode.hcloud_server.ipv4_address }}"
+    when:
+    - hetznernode.hcloud_server.ipv4_address is defined
+
+  - name: Wait for SSH to become available # noqa 503
+    wait_for:
+      host: "{{ hetznernode.hcloud_server.ipv4_address }}"
+      port: 22
+      connect_timeout: 10
+    when:
+    - hetznernode.changed
+    - hetznernode.hcloud_server.ipv4_address is defined
+
+    delay: 1
+
+  - name: Gather facts about remote machines
+    setup:
+
+  # TODO Include IPv6
+  # Feature for future, since most stuff runs in docker and
+  # implementation is kinda wonky
+  #
+  #- name: Ensure all relevant DNS entries are set for IPv6
+  #  inwx.collection.dns:
+  #    domain: "{{ item.0.apex }}"
+  #    type: AAAA
+  #    record: "{{ item.1.name }}"
+  #    value: "{{ hetznernode.hcloud_server.ipv6 }}"
+  #    state: present
+  #    username: "{{ inwx_user }}"
+  #    password: "{{ inwx_pass }}"
+  #  loop: "{{ domains|subelements('subs') }}"
+  #  when:
+  #  - false

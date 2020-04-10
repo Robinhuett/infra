@@ -1,0 +1,77 @@
+---
+
+- name: Determine if promtail exists
+  stat:
+    path: /usr/bin/promtail
+  register: promtail_bin
+
+- name: Install promtail
+  block:
+  - name: Download promtail binary
+    get_url:
+      url: https://github.com/grafana/loki/releases/download/v1.5.0/promtail-linux-amd64.zip
+      dest: /tmp/promtail-linux-amd64.zip
+      checksum: sha256:6695ea8d0c831c0ccab3abfac9e3bdf065e83887d540583b8e28644168ca038c
+      mode: 0777
+    check_mode: no
+
+  - name: Extract downloaded promtail binary
+    unarchive:
+      src: /tmp/promtail-linux-amd64.zip
+      dest: /tmp/
+      remote_src: yes
+    check_mode: no
+
+  - name: Delete downloaded archive
+    file:
+      path: /tmp/promtail-linux-amd64.zip
+      state: absent
+    check_mode: no
+
+  - name: Move promtail executable to /usr/bin/
+    become: yes
+    copy:
+      src: /tmp/promtail-linux-amd64
+      dest: /usr/bin/promtail
+      remote_src: yes
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Delete downloaded executable
+    file:
+      path: /tmp/promtail-linux-amd64
+      state: absent
+    when:
+    - not promtail_bin.stat.exists
+    check_mode: no
+
+- name: Ensure directory for promtail exists
+  become: yes
+  file:
+    path: /etc/promtail
+    state: directory
+
+- name: Copy promtail config to target system
+  become: yes
+  template:
+    src: promtail-config.yml.j2
+    dest: /etc/promtail/config.yml
+    owner: root
+    group: root
+    mode: 0640
+  notify: Restart promtail
+
+- name: Add promtail systemd unit
+  become: yes
+  copy:
+    src: promtail.service
+    dest: /etc/systemd/system/promtail.service
+
+- name: Enable promtail systemd unit
+  become: yes
+  systemd:
+    name: promtail.service
+    state: started
+    enabled: yes
+    daemon_reload: yes

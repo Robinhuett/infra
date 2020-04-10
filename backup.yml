@@ -1,0 +1,12 @@
+---
+
+- hosts:
+  - all
+
+  roles:
+  - role: borg
+    tags:
+    - backup
+    when:
+    - backup_locations is defined
+    - env != "dev"
