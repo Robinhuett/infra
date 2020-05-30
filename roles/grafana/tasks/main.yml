@@ -34,6 +34,10 @@
     user: root
     restart_policy: always
     state: started
+  notify: Reload nginx
+
+- name: Fire handlers
+  meta: flush_handlers
 
 - name: Create personal user
   community.grafana.grafana_user:

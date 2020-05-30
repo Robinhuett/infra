@@ -41,6 +41,10 @@
       loki-batch-size: "400"
     restart_policy: always
     state: started
+  notify: Reload nginx
+
+- name: Fire handlers
+  meta: flush_handlers
 
 - name: Add loki as datasource to grafana
   community.grafana.grafana_datasource:

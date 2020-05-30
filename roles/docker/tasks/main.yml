@@ -69,4 +69,4 @@
 - name: Install loki docker plugin
   become: yes
   command: docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
-  when: loki_plugin.stdout | bool
+  when: loki_plugin.stdout_lines | length == 0

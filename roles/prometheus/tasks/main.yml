@@ -39,6 +39,7 @@
     restart_policy: always
     state: started
   register: prometheus_container
+  notify: Reload nginx
 
 - name: Restart Prometheus # noqa 503
   become: yes
@@ -49,6 +50,9 @@
   when:
   - prometheus_config.changed
   - not prometheus_container.changed
+
+- name: Fire handlers
+  meta: flush_handlers
 
 - name: Add prometheus as datasource to grafana
   community.grafana.grafana_datasource:
