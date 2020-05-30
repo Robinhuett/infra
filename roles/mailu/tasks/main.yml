@@ -309,7 +309,7 @@
     domain: "{{ item }}"
     type: CNAME
     record: autodiscover
-    value: "{{ mail.domain }}"
+    value: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
     ttl: 3600
     solo: yes
     state: present
@@ -324,7 +324,7 @@
     domain: "{{ item }}"
     type: CNAME
     record: autoconfig
-    value: "{{ mail.domain }}"
+    value: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
     ttl: 3600
     solo: yes
     state: present
