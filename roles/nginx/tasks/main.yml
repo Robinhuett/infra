@@ -15,6 +15,7 @@
   become: yes
   openssl_dhparam:
     path: /etc/ssl/certs/dhparam.pem
+    size: 2048
   when:
   - env != "dev"
 
