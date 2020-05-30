@@ -143,26 +143,26 @@
   when:
   - not ansible_check_mode
 
-- name: Start mailu antivirus container
-  become: yes
-  docker_container:
-    name: antivirus
-    image: mailu/clamav:1.7
-    volumes:
-    - /var/data/mailu/filter:/data
-    networks:
-    - name: mailu
-    networks_cli_compatible: yes
-    env_file: /var/data/mailu.env
-    log_driver: loki
-    log_options:
-      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
-      loki-retries: "5"
-      loki-batch-size: "400"
-    restart_policy: always
-    state: started
-  when:
-  - not ansible_check_mode
+# - name: Start mailu antivirus container
+#   become: yes
+#   docker_container:
+#     name: antivirus
+#     image: mailu/clamav:1.7
+#     volumes:
+#     - /var/data/mailu/filter:/data
+#     networks:
+#     - name: mailu
+#     networks_cli_compatible: yes
+#     env_file: /var/data/mailu.env
+#     log_driver: loki
+#     log_options:
+#       loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+#       loki-retries: "5"
+#       loki-batch-size: "400"
+#     restart_policy: always
+#     state: started
+#   when:
+#   - not ansible_check_mode
 
 - name: Start mailu webdav container
   become: yes
