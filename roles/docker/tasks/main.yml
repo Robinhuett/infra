@@ -59,6 +59,8 @@
 - name: Determine if loki docker plugin is installed
   become: yes
   shell: set -o pipefail && docker plugin ls | grep loki
+  args:
+    executable: /usr/bin/bash
   register: loki_plugin
   changed_when: no
   failed_when: no
