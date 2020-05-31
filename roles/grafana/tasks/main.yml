@@ -18,9 +18,9 @@
       GF_SECURITY_DISABLE_GRAVATAR: "true"
       GF_SMTP_ENABLED: "true"
       GF_SMTP_HOST: "{{ mail.domain.sub }}.{{ mail.domain.apex }}:465"
-      GF_SMTP_USER: "{{ mail.user.noreply.name }}"
+      GF_SMTP_USER: "{{ mail.user.noreply.name }}@{{ mail.domain.apex }}"
       GF_SMTP_PASSWORD: "{{ mail.user.noreply.pass }}"
-      GF_SMTP_FROM_ADDRESS: no_reply+grafana@rbn.is
+      GF_SMTP_FROM_ADDRESS: "{{ mail.user.noreply.name }}@{{ mail.domain.apex }}"
       GF_SMTP_FROM_NAME: Grafana
     volumes:
     - /var/data/grafana:/var/lib/grafana

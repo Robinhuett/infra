@@ -54,7 +54,7 @@
       SMTP_PORT: "465"
       SMTP_NAME: "{{ mail.user.noreply.name }}"
       SMTP_PASSWORD: "{{ mail.user.noreply.pass }}"
-      SMTP_FROM_ADDRESS: no_reply+nextcloud@rbn.is
+      SMTP_FROM_ADDRESS: "{{ mail.user.noreply.name }}@{{ mail.domain.apex }}"
     log_driver: loki
     log_options:
       loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
