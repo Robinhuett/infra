@@ -46,16 +46,25 @@
   set_fact:
     ssh_public_key: "{{ root_user['ssh_public_key'] }}"
 
+- name: Add rsync.net host to known_hosts on ci machine
+  known_hosts:
+    name: "{{ borg.host }}"
+    key: "{{ borg.host_key }}"
+  delegate_to: localhost
+  run_once: yes
+
 - name: Get current ssh keys
   command: ssh {{ borg.user }}@{{ borg.host }} 'cat .ssh/authorized_keys'
   delegate_to: localhost
+  run_once: yes
   changed_when: False
   register: current_ssh_public_keys
+  no_log: yes
 
 - name: Add public key to rysnc.net account
   shell: set -o pipefail && echo '{{ item.key }}' | ssh {{ borg.user }}@{{ borg.host }} 'dd of=.ssh/authorized_keys oflag=append conv=notrunc'
   args:
-   executable: /usr/bin/bash
+   executable: /bin/bash
   loop: "{{ ssh_public_keys }}"
   loop_control:
     label: "{{ item.host }}"
@@ -64,6 +73,7 @@
   - item.key is defined
   - item.key not in current_ssh_public_keys.stdout
   delegate_to: localhost
+  run_once: yes
 
 - name: Ensure directory for borg exists
   become: yes
