@@ -58,7 +58,7 @@
   become: yes
   docker_container:
     name: admin
-    image: mailu/admin:1.7
+    image: mailu/admin:{{ mailu.version }}
     volumes:
     - /var/data/mailu/data:/data
     - /var/data/mailu/dkim:/dkim
@@ -80,7 +80,7 @@
   become: yes
   docker_container:
     name: imap
-    image: mailu/dovecot:1.7
+    image: mailu/dovecot:{{ mailu.version }}
     volumes:
     - /var/data/mailu/mail:/mail
     - /var/data/mailu/overrides:/overrides
@@ -102,7 +102,7 @@
   become: yes
   docker_container:
     name: smtp
-    image: mailu/postfix:1.7
+    image: mailu/postfix:{{ mailu.version }}
     volumes:
     - /var/data/mailu/mailqueue:/queue
     - /var/data/mailu/overrides:/overrides
@@ -124,7 +124,7 @@
   become: yes
   docker_container:
     name: antispam
-    image: mailu/rspamd:1.7
+    image: mailu/rspamd:{{ mailu.version }}
     volumes:
     - /var/data/mailu/filter:/var/lib/rspamd
     - /var/data/mailu/dkim:/dkim
@@ -147,7 +147,7 @@
 #   become: yes
 #   docker_container:
 #     name: antivirus
-#     image: mailu/clamav:1.7
+#     image: mailu/clamav:{{ mailu.version }}
 #     volumes:
 #     - /var/data/mailu/filter:/data
 #     networks:
@@ -168,7 +168,7 @@
   become: yes
   docker_container:
     name: webdav
-    image: mailu/radicale:1.7
+    image: mailu/radicale:{{ mailu.version }}
     volumes:
     - /va/data/mailu/dav:/data
     networks:
@@ -189,7 +189,7 @@
   become: yes
   docker_container:
     name: fetchmail
-    image: mailu/fetchmail:1.7
+    image: mailu/fetchmail:{{ mailu.version }}
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -208,7 +208,7 @@
   become: yes
   docker_container:
     name: webmail
-    image: mailu/rainloop:1.7
+    image: mailu/rainloop:{{ mailu.version }}
     volumes:
     - /var/data/mailu/rainloop:/data
     networks:
@@ -229,7 +229,7 @@
   become: yes
   docker_container:
     name: front
-    image: mailu/nginx:1.7
+    image: mailu/nginx:{{ mailu.version }}
     volumes:
     - /var/data/mailu/certs:/certs
     - /var/data/mailu/overrides/nginx:/overrides
@@ -284,7 +284,7 @@
   inwx.collection.dns:
     domain: "{{ item }}"
     type: TXT
-    value: v=spf1 mx a:mail.rbn.is ~all
+    value: v=spf1 mx a:{{ mail.domain.sub }}.{{ mail.domain.apex }} ~all
     ttl: 3600
     state: present
     username: "{{ inwx_user }}"
@@ -298,7 +298,7 @@
     domain: "{{ item }}"
     type: TXT
     record: _dmarc
-    value: v=DMARC1; p=reject; rua=mailto:postmaster@rbn.is; ruf=mailto:postmaster@rbn.is; adkim=s; aspf=s
+    value: v=DMARC1; p=reject; rua=mailto:postmaster@{{ mail.domain.apex }}; ruf=mailto:postmaster@{{ mail.domain.apex }}; adkim=s; aspf=s
     ttl: 3600
     solo: yes
     state: present

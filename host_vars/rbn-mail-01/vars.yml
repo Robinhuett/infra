@@ -1,6 +1,7 @@
 ---
 
 mailu:
+  version: "1.7"
   secret_key: "{{ vault_mailu_secret_key }}"
   domain:
     apex: "{{ mail.domain.apex }}"
