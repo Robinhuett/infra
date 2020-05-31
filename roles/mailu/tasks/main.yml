@@ -269,7 +269,7 @@
   inwx.collection.dns:
     domain: "{{ item }}"
     type: MX
-    priority: 9
+    priority: 10
     value: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
     ttl: 86400
     solo: yes
@@ -284,7 +284,7 @@
   inwx.collection.dns:
     domain: "{{ item }}"
     type: TXT
-    value: v=spf1 a mx ~all
+    value: v=spf1 mx a:mail.rbn.is ~all
     ttl: 3600
     state: present
     username: "{{ inwx_user }}"
@@ -298,7 +298,7 @@
     domain: "{{ item }}"
     type: TXT
     record: _dmarc
-    value: v=DMARC1; p=none; pct=100; rua=mailto:postmaster@rbn.is; ruf=mailto:postmaster@rbn.is; adkim=s; aspf=r
+    value: v=DMARC1; p=reject; rua=mailto:postmaster@rbn.is; ruf=mailto:postmaster@rbn.is; adkim=s; aspf=s
     ttl: 3600
     solo: yes
     state: present
