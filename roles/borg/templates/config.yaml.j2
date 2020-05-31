@@ -72,7 +72,7 @@ storage:
     # use on repositories that were initialized with passcommand/repokey encryption.
     # Note that if both encryption_passcommand and encryption_passphrase are set,
     # then encryption_passphrase takes precedence. Defaults to not set.
-    # encryption_passcommand: secret-tool lookup borg-repository repo-name
+    encryption_passcommand: cat /etc/borgmatic/key
 
     # Number of seconds between each checkpoint during a long-running backup. See
     # https://borgbackup.readthedocs.io/en/stable/faq.html#if-a-backup-stops-mid-way-does-the-already-backed-up-data-stay-there
@@ -101,7 +101,7 @@ storage:
     borg_security_directory: /var/data/borg/security
 
     # Path for Borg encryption key files. Defaults to $borg_base_directory/.config/borg/keys
-    borg_keys_directory: /var/data/borg/keys
+    # borg_keys_directory: /var/data/borg/keys
 
     # Umask to be used for borg create. Defaults to 0077.
     umask: 0077

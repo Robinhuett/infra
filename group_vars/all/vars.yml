@@ -33,6 +33,7 @@ borg:
   host: "{{ vault_borg_host }}"
   host_key: "{{ vault_borg_host_key }}"
   user: "{{ vault_borg_user }}"
+  repokey: "{{ vault_borg_repokey }}"
   retention_policy:
     keep_hourly: 6
     keep_daily: 7

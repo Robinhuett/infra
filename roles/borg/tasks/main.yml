@@ -21,6 +21,13 @@
     mode: 0700
     owner: root
 
+- name: Add Repokey
+  become: yes
+  template:
+    src: key.j2
+    dest: /etc/borgmatic/key
+    mode: 0600
+
 - name: Add borgmatic config
   become: yes
   template:
@@ -75,17 +82,11 @@
   delegate_to: localhost
   run_once: yes
 
-- name: Ensure directory for borg exists
-  become: yes
-  file:
-    path: /var/data/borg/keys
-    state: directory
-
 - name: Initiallize borg repo
   become: yes
   become_user: root
   command:
-    cmd: borgmatic init --encryption keyfile
+    cmd: borgmatic init --encryption repokey
   register: borg_repo_init
   changed_when: borg_repo_init.stdout | length > 0
 
