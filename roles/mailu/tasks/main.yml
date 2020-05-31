@@ -208,9 +208,9 @@
   become: yes
   docker_container:
     name: webmail
-    image: mailu/roundcube:1.7
+    image: mailu/rainloop:1.7
     volumes:
-    - /var/data/mailu/webmail:/data
+    - /var/data/mailu/rainloop:/data
     networks:
     - name: mailu
     networks_cli_compatible: yes
