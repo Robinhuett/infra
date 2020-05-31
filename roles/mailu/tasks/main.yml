@@ -260,6 +260,10 @@
 - name: Setup noreply mail user # noqa 301
   become: yes
   command: docker exec admin flask mailu user {{ mail.user.noreply.name }} {{ mail.domain.apex }} '{{ mail.user.noreply.pass }}'
+  register: noreply_user
+  changed_when: noreply_user.rc == 0
+  ignore_errors: yes
+  no_log: yes
 
 - name: Ensure all MX DNS records are set
   inwx.collection.dns:
@@ -338,11 +342,11 @@
 # Currently it's not possible to elegantly generate those via cli.
 
 - name: Ensure Reverse DNS for IPv4 is set
+  delegate_to: localhost
   hcloud_rdns:
     api_token: "{{ hetzner_api_token }}"
     dns_ptr: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
     ip_address: "{{ ansible_default_ipv4.address }}"
     server: "{{ inventory_hostname }}"
-  delegate_to: localhost
   when:
   - "'hetzner' in group_names"
