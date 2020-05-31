@@ -37,6 +37,7 @@ domains:
 - apex: 3pif.de
   subs:
   - name: ""
+    csp: "default-src 'self'; img-src 'self' i.ytimg.com; font-src 'self' fonts.googleapis.com fonts.gstatic.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; connect-src api.rss2json.com; frame-src www.youtube.com youtube.com;"
     nginx_conf: |
       location / {
         proxy_pass http://localhost:6502;
@@ -46,6 +47,7 @@ domains:
   subs:
   - name: web-01
   - name: ""
+    csp: "default-src 'self'; img-src avatars0.githubusercontent.com; font-src 'self'"
     nginx_conf: |
       location / {
         proxy_pass http://localhost:6503;
