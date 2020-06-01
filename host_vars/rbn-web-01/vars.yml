@@ -29,6 +29,7 @@ domains:
 - apex: narf.dev
   subs:
   - name: ""
+    csp: "default-src 'self'; font-src fonts.gstatic.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com;"
     nginx_conf: |
       location / {
         proxy_pass http://localhost:6501;
