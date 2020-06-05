@@ -64,6 +64,38 @@
     - item.1.name | length == 0
     register: dns_entries
 
+  - name: Ensure CAA issue records are set
+    inwx.collection.dns:
+      domain: "{{ item.apex }}"
+      type: CAA
+      flag: 0
+      tag: issue
+      value: "letsencrypt.org;"
+      ttl: 3600
+      solo: yes
+      state: present
+      username: "{{ inwx_user }}"
+      password: "{{ inwx_pass }}"
+    loop: "{{ domains }}"
+    tags:
+    - dns
+
+  - name: Ensure CAA iodef records are set
+    inwx.collection.dns:
+      domain: "{{ item.apex }}"
+      type: CAA
+      flag: 0
+      tag: iodef
+      value: "mailto:postmaster@{{ mail.domain.apex }};"
+      ttl: 3600
+      solo: yes
+      state: present
+      username: "{{ inwx_user }}"
+      password: "{{ inwx_pass }}"
+    loop: "{{ domains }}"
+    tags:
+    - dns
+
   - name: Use IP to connect to host
     set_fact:
       ansible_host: "{{ hetznernode.hcloud_server.ipv4_address }}"
