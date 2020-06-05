@@ -341,6 +341,36 @@
 # Note on DKIM DNS records:
 # Currently it's not possible to elegantly generate those via cli.
 
+- name: Ensure all TLS-RPT DNS records are set
+  inwx.collection.dns:
+    domain: "{{ item }}"
+    type: TXT
+    record: _smtp._tls
+    value: "v=TLSRPTv1; rua=mailto:postmaster@{{ mail.domain.apex }};"
+    ttl: 3600
+    solo: yes
+    state: present
+    username: "{{ inwx_user }}"
+    password: "{{ inwx_pass }}"
+  loop: "{{ mail.domains }}"
+  tags:
+  - dns
+
+- name: Ensure all MTA_STL DNS records are set (_mta-sts)
+  inwx.collection.dns:
+    domain: "{{ item }}"
+    type: TXT
+    record: _mta-sts
+    value: "{{ mail.mta_sts.version }}"
+    ttl: 3600
+    solo: yes
+    state: present
+    username: "{{ inwx_user }}"
+    password: "{{ inwx_pass }}"
+  loop: "{{ mail.domains }}"
+  tags:
+  - dns
+
 - name: Ensure Reverse DNS for IPv4 is set
   delegate_to: localhost
   hcloud_rdns:
