@@ -70,7 +70,7 @@
       type: CAA
       flag: 0
       tag: issue
-      value: "letsencrypt.org;"
+      value: "letsencrypt.org"
       ttl: 3600
       solo: yes
       state: present
@@ -86,7 +86,7 @@
       type: CAA
       flag: 0
       tag: iodef
-      value: "mailto:postmaster@{{ mail.domain.apex }};"
+      value: "mailto:postmaster@{{ mail.domain.apex }}"
       ttl: 3600
       solo: yes
       state: present

@@ -26,6 +26,8 @@ domains:
     nginx_conf: |
       return 302 https://rbn.is;
   - name: "*"
+  - name: "mta-sts"
+    nginx_conf: "{{ mail.mta_sts.nginx }}"
 - apex: narf.dev
   subs:
   - name: ""
@@ -35,6 +37,8 @@ domains:
         proxy_pass http://localhost:6501;
       }
   - name: "*"
+  - name: "mta-sts"
+    nginx_conf: "{{ mail.mta_sts.nginx }}"
 - apex: 3pif.de
   subs:
   - name: ""
@@ -44,6 +48,8 @@ domains:
         proxy_pass http://localhost:6502;
       }
   - name: "*"
+  - name: "mta-sts"
+    nginx_conf: "{{ mail.mta_sts.nginx }}"
 - apex: rbn.is
   subs:
   - name: web-01
@@ -58,3 +64,5 @@ domains:
     csp: "{{ nextcloud.csp }}"
     skip_dns_config: yes
     nginx_conf: "{{ nextcloud.nginx_conf }}"
+  - name: "mta-sts"
+    nginx_conf: "{{ mail.mta_sts.nginx }}"

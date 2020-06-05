@@ -24,6 +24,18 @@ mail:
   - tripp.xyz
   - narf.dev
   - 3pif.de
+  mta_sts:
+    nginx: |
+      location ^~ /.well-known/mta-sts.txt {
+        try_files $uri @mta-sts;
+      }
+      location @mta-sts {
+      return 200 "version: STSv1
+      mode: enforce
+      max_age: 10368000
+      mx: mail.rbn.is\n";
+      }
+    version: "v=STSv1; id=20200605104800Z;"
   user:
     noreply:
       name: "{{ vault_mail_user_noreply_name }}"
