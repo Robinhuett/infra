@@ -30,8 +30,23 @@
   docker_network:
     name: mailu
     driver: bridge
+    enable_ipv6: yes
     ipam_config:
     - subnet: 192.168.203.0/24
+    - subnet: fd30:97e2:811b:beef::/64
+
+- name: Start ipv6nat container to enable sane IPv6 in docker # Yes I know IPv6 NAT is bad yada yada yada..
+  docker_container:
+    name: ipv6nat_01
+    image: robbertkl/ipv6nat
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    nerwork_mode: host
+    privileged: yes
+    restart_policy: always
+    state: started
+  when:
+  - not ansible_check_mode
 
 # networks_cli_compatible is set because auf deprecation in ansible 2.12 and not needed after this
 - name: Start redis container
@@ -243,6 +258,15 @@
     - "{{ ansible_default_ipv4.address }}:995:995"
     - "{{ ansible_default_ipv4.address }}:143:143"
     - "{{ ansible_default_ipv4.address }}:993:993"
+    - "{{ ansible_default_ipv6.address }}:80:80"
+    - "{{ ansible_default_ipv6.address }}:443:443"
+    - "{{ ansible_default_ipv6.address }}:25:25"
+    - "{{ ansible_default_ipv6.address }}:465:465"
+    - "{{ ansible_default_ipv6.address }}:587:587"
+    - "{{ ansible_default_ipv6.address }}:110:110"
+    - "{{ ansible_default_ipv6.address }}:995:995"
+    - "{{ ansible_default_ipv6.address }}:143:143"
+    - "{{ ansible_default_ipv6.address }}:993:993"
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -371,12 +395,15 @@
   tags:
   - dns
 
-- name: Ensure Reverse DNS for IPv4 is set
+- name: Ensure Reverse DNS is set
   delegate_to: localhost
   hcloud_rdns:
     api_token: "{{ hetzner_api_token }}"
     dns_ptr: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
-    ip_address: "{{ ansible_default_ipv4.address }}"
+    ip_address: "{{ item }}"
     server: "{{ inventory_hostname }}"
+  loop:
+  - "{{ ansible_default_ipv4.address }}"
+  - "{{ ansible_default_ipv6.address }}"
   when:
   - "'hetzner' in group_names"

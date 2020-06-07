@@ -72,7 +72,6 @@
       tag: issue
       value: "letsencrypt.org"
       ttl: 3600
-      solo: yes
       state: present
       username: "{{ inwx_user }}"
       password: "{{ inwx_pass }}"
@@ -88,7 +87,6 @@
       tag: iodef
       value: "mailto:postmaster@{{ mail.domain.apex }}"
       ttl: 3600
-      solo: yes
       state: present
       username: "{{ inwx_user }}"
       password: "{{ inwx_pass }}"
@@ -113,22 +111,26 @@
 
     delay: 1
 
+- hosts:
+  - hetzner
+
+  tasks:
   - name: Gather facts about remote machines
     setup:
 
-  # TODO Include IPv6
-  # Feature for future, since most stuff runs in docker and
-  # implementation is kinda wonky
-  #
-  #- name: Ensure all relevant DNS entries are set for IPv6
-  #  inwx.collection.dns:
-  #    domain: "{{ item.0.apex }}"
-  #    type: AAAA
-  #    record: "{{ item.1.name }}"
-  #    value: "{{ hetznernode.hcloud_server.ipv6 }}"
-  #    state: present
-  #    username: "{{ inwx_user }}"
-  #    password: "{{ inwx_pass }}"
-  #  loop: "{{ domains|subelements('subs') }}"
-  #  when:
-  #  - false
+  - name: Ensure all DNS AAAA records are set
+    inwx.collection.dns:
+      domain: "{{ item.0.apex }}"
+      type: AAAA
+      record: "{{ item.1.name }}"
+      value: "{{ ansible_default_ipv6.address }}"
+      ttl: 3600
+      solo: yes
+      state: present
+      username: "{{ inwx_user }}"
+      password: "{{ inwx_pass }}"
+    loop: "{{ domains|subelements('subs') }}"
+    tags:
+    - dns
+    when:
+    - item.1.skip_dns_config is undefined
