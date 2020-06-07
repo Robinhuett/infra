@@ -37,5 +37,4 @@
 - Some of my own stuff
 
 ## Features for Future
-- Use IPv6
 - Use Docker Swarm
