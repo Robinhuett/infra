@@ -31,6 +31,7 @@
   apt:
     name:
     - unzip
+    - tmux
     state: present
   check_mode: no
 
