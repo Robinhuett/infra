@@ -3,6 +3,8 @@
 inwx_user: "{{ vault_inwx_user }}"
 inwx_pass: "{{ vault_inwx_pass }}"
 
+users: "{{ vault_users }}"
+
 letsencrypt_mail: "{{ vault_letsencrypt_mail }}"
 
 backup_locations:

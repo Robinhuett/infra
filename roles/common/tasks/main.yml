@@ -48,3 +48,35 @@
   pip:
     name: python-apt
   check_mode: no
+
+- name: Make sure the group 'wheel' exists
+  become: yes
+  group:
+    name: wheel
+    state: present
+
+- name: Allow the group 'wheel' to use sudo without password
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Manage additional users
+  become: yes
+  user:
+    name: "{{ item.name }}"
+    shell: "/bin/bash"
+    groups: wheel
+    append: yes
+  loop: "{{ users }}"
+
+- name: Manage SSH Keys for additional Users
+  become: yes
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.key }}"
+    exclusive: yes
+  loop: "{{ users }}"
