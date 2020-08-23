@@ -46,15 +46,14 @@
 - name: Fire handlers
   meta: flush_handlers
 
-# Disable till a new version of ansible-collections/community.grafana is released
-# - name: Add loki as datasource to grafana
-#   community.grafana.grafana_datasource:
-#     name: ds-loki
-#     grafana_url: https://{{ grafana.domain.sub }}.{{ grafana.domain.apex }}
-#     grafana_user: "{{ grafana.admin.user }}"
-#     grafana_password: "{{ grafana.admin.pass }}"
-#     org_id: "1"
-#     ds_type: "loki"
-#     ds_url: "https://{{ loki.domain.sub }}.{{ loki.domain.apex }}"
-#     basic_auth_user: "{{ loki.user }}"
-#     basic_auth_password: "{{ loki.pass }}"
+- name: Add loki as datasource to grafana
+  community.grafana.grafana_datasource:
+    name: ds-loki
+    grafana_url: https://{{ grafana.domain.sub }}.{{ grafana.domain.apex }}
+    grafana_user: "{{ grafana.admin.user }}"
+    grafana_password: "{{ grafana.admin.pass }}"
+    org_id: "1"
+    ds_type: "loki"
+    ds_url: "https://{{ loki.domain.sub }}.{{ loki.domain.apex }}"
+    basic_auth_user: "{{ loki.user }}"
+    basic_auth_password: "{{ loki.pass }}"
