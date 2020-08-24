@@ -20,6 +20,7 @@
       src: /tmp/node_exporter-1.0.0-rc.1.linux-amd64.tar.gz
       dest: /tmp/
       remote_src: yes
+      mode: 0777
     check_mode: no
 
   - name: Delete downloaded archive
@@ -51,6 +52,7 @@
   copy:
     src: node_exporter.service
     dest: /etc/systemd/system/node_exporter.service
+    mode: 0644
 
 - name: Enable node_exporter systemd unit
   become: yes

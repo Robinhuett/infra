@@ -17,12 +17,14 @@
   file:
     path: /var/data/mailu
     state: directory
+    mode: 0755
 
 - name: Make sure mailu.env file is present
   become: yes
   template:
     src: mailu.env.j2
     dest: /var/data/mailu.env
+    mode: 0644
   register: mailu_env
 
 - name: Create docker network for mailu

@@ -6,6 +6,7 @@
     path: /var/data/loki
     owner: "10001"
     state: directory
+    mode: 0755
 
 - name: Create htpasswd file for basic auth to loki
   become: yes
@@ -23,6 +24,7 @@
     dest: /var/data/loki/config.yml
     owner: "10001"
     group: root
+    mode: 0644
 
 - name: Start loki docker container
   become: yes

@@ -23,6 +23,7 @@
   template:
     src: nginx-site-apex-cert.j2
     dest: /etc/nginx/sites-available/{{ item.0.apex }}-cert.conf
+    mode: 0644
   when:
   - item.1.name | length == 0
   - not certfile.stat.exists
@@ -33,29 +34,32 @@
   template:
     src: nginx-site-sub-cert.j2
     dest: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}-cert.conf
+    mode: 0644
   when:
   - item.1.name | length > 0
   - not certfilesub.stat.exists
   notify: Reload nginx
 
+# Skip ansible-lint rule 208 for symlinks til >=4.3.2 is released
 - name: Enable gTLD+1 sites
   become: yes
   file:
     src: /etc/nginx/sites-available/{{ item.0.apex }}-cert.conf
     dest: /etc/nginx/sites-enabled/{{ item.0.apex }}-cert.conf
-    state: link
+    state: link # noqa 208
   when:
   - item.1.name | length == 0
   - not certfile.stat.exists
   - not ansible_check_mode
   notify: Reload nginx
 
+# Skip ansible-lint rule 208 for symlinks til >=4.3.2 is released
 - name: Enable subdomain sites
   become: yes
   file:
     src: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}-cert.conf
     dest: /etc/nginx/sites-enabled/{{ item.1.name }}.{{ item.0.apex }}-cert.conf
-    state: link
+    state: link # noqa 208
   when:
   - item.1.name | length > 0
   - not certfilesub.stat.exists
