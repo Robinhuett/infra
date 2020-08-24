@@ -6,6 +6,7 @@
     path: /var/data/grafana
     owner: "472"
     state: directory
+    mode: 0755
 
 - name: Start grafana docker container
   become: yes

@@ -5,6 +5,7 @@
   file:
     path: /var/data/nextcloud/db
     state: directory
+    mode: 0755
 
 - name: Start nextcloud db container
   become: yes
@@ -30,6 +31,7 @@
   file:
     path: /var/data/nextcloud/app
     state: directory
+    mode: 0755
 
 - name: Start nextcloud app container
   become: yes

@@ -10,6 +10,7 @@
   template:
     src: nginx-site-apex.j2
     dest: /etc/nginx/sites-available/{{ item.0.apex }}.conf
+    mode: 0644
   loop: "{{ domains|subelements('subs') }}"
   when:
   - item.1.nginx_conf is defined
@@ -23,6 +24,7 @@
   template:
     src: nginx-site-sub.j2
     dest: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}.conf
+    mode: 0644
   loop: "{{ domains|subelements('subs') }}"
   when:
   - item.1.nginx_conf is defined
@@ -31,12 +33,13 @@
     label: "{{ item.1.name }}.{{ item.0.apex }}"
   notify: Reload nginx
 
+# Skip ansible-lint rule 208 for symlinks til >=4.3.2 is released
 - name: Enable gTLD+1 sites
   become: yes
   file:
     src: /etc/nginx/sites-available/{{ item.0.apex }}.conf
     dest: /etc/nginx/sites-enabled/{{ item.0.apex }}.conf
-    state: link
+    state: link # noqa 208
   loop: "{{ domains|subelements('subs') }}"
   when:
   - item.1.nginx_conf is defined
@@ -46,12 +49,13 @@
     label: "{{ item.0.apex }}"
   notify: Reload nginx
 
+# Skip ansible-lint rule 208 for symlinks til >=4.3.2 is released
 - name: Enable subdomain sites
   become: yes
   file:
     src: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}.conf
     dest: /etc/nginx/sites-enabled/{{ item.1.name }}.{{ item.0.apex }}.conf
-    state: link
+    state: link # noqa 208
   loop: "{{ domains|subelements('subs') }}"
   when:
   - item.1.nginx_conf is defined

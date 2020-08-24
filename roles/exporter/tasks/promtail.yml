@@ -20,6 +20,7 @@
       src: /tmp/promtail-linux-amd64.zip
       dest: /tmp/
       remote_src: yes
+      mode: 0777
     check_mode: no
 
   - name: Delete downloaded archive
@@ -51,6 +52,7 @@
   file:
     path: /etc/promtail
     state: directory
+    mode: 0640
 
 - name: Copy promtail config to target system
   become: yes
@@ -67,6 +69,7 @@
   copy:
     src: promtail.service
     dest: /etc/systemd/system/promtail.service
+    mode: 0644
 
 - name: Enable promtail systemd unit
   become: yes

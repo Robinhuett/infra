@@ -5,6 +5,7 @@
   file:
     path: /var/data/prometheus
     state: directory
+    mode: 0755
 
 - name: Create htpasswd file for basic auth to loki
   become: yes
@@ -20,6 +21,7 @@
   template:
     src: prometheus.yml.j2
     dest: /var/data/prometheus/prometheus.yml
+    mode: 0644
   register: prometheus_config
 
 - name: Start prometheus docker container

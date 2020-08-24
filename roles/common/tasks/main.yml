@@ -63,6 +63,7 @@
     regexp: '^%wheel'
     line: '%wheel ALL=(ALL) NOPASSWD: ALL'
     validate: /usr/sbin/visudo -cf %s
+    mode: preserve
 
 - name: Manage additional users
   become: yes
