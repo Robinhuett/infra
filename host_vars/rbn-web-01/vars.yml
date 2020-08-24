@@ -54,7 +54,7 @@ domains:
   subs:
   - name: web-01
   - name: ""
-    csp: "default-src 'self'; img-src avatars0.githubusercontent.com; font-src 'self'"
+    csp: "default-src 'self'; img-src 'self' avatars0.githubusercontent.com; font-src 'self'"
     nginx_conf: |
       location / {
         proxy_pass http://localhost:6503;
