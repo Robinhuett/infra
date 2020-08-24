@@ -4,7 +4,7 @@
   become: yes
   docker_container:
     name: narf_01
-    image: rbnt/narf:latest
+    image: rbnis/narf:latest
     published_ports:
     - 127.0.0.1:6501:80
     restart_policy: always
