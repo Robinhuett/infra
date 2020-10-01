@@ -44,6 +44,7 @@
     image: robbertkl/ipv6nat
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro
+    - /etc/localtime:/etc/localtime:ro
     network_mode: host
     privileged: yes
     restart_policy: always
@@ -59,6 +60,7 @@
     image: redis:alpine
     volumes:
     - /var/data/mailu/redis:/data
+    - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -80,6 +82,7 @@
     volumes:
     - /var/data/mailu/data:/data
     - /var/data/mailu/dkim:/dkim
+    - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -102,6 +105,7 @@
     volumes:
     - /var/data/mailu/mail:/mail
     - /var/data/mailu/overrides:/overrides
+    - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -124,6 +128,7 @@
     volumes:
     - /var/data/mailu/mailqueue:/queue
     - /var/data/mailu/overrides:/overrides
+    - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -147,6 +152,7 @@
     - /var/data/mailu/filter:/var/lib/rspamd
     - /var/data/mailu/dkim:/dkim
     - /var/data/mailu/overrides/rspamd:/etc/rspamd/override.d
+    - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -161,27 +167,6 @@
   when:
   - not ansible_check_mode
 
-# - name: Start mailu antivirus container
-#   become: yes
-#   docker_container:
-#     name: antivirus
-#     image: mailu/clamav:{{ mailu.version }}
-#     volumes:
-#     - /var/data/mailu/filter:/data
-#     networks:
-#     - name: mailu
-#     networks_cli_compatible: yes
-#     env_file: /var/data/mailu.env
-#     log_driver: loki
-#     log_options:
-#       loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
-#       loki-retries: "5"
-#       loki-batch-size: "400"
-#     restart_policy: always
-#     state: started
-#   when:
-#   - not ansible_check_mode
-
 - name: Start mailu webdav container
   become: yes
   docker_container:
@@ -189,6 +174,7 @@
     image: mailu/radicale:{{ mailu.version }}
     volumes:
     - /va/data/mailu/dav:/data
+    - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -208,6 +194,8 @@
   docker_container:
     name: fetchmail
     image: mailu/fetchmail:{{ mailu.version }}
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -229,6 +217,7 @@
     image: mailu/rainloop:{{ mailu.version }}
     volumes:
     - /var/data/mailu/rainloop:/data
+    - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
     networks_cli_compatible: yes
@@ -251,6 +240,7 @@
     volumes:
     - /var/data/mailu/certs:/certs
     - /var/data/mailu/overrides/nginx:/overrides
+    - /etc/localtime:/etc/localtime:ro
     published_ports:
     - "80:80"
     - "443:443"
