@@ -11,7 +11,7 @@
   become: yes
   docker_container:
     name: nextcloud_db_01
-    image: postgres:latest
+    image: postgres:12
     volumes:
     - /var/data/nextcloud/db:/var/lib/postgresql/data
     env:
