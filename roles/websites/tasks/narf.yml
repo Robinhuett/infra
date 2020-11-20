@@ -1,7 +1,7 @@
 ---
 
 - name: Start narf container
-  become: yes
+  become: true
   docker_container:
     name: narf_01
     image: rbnis/narf:latest

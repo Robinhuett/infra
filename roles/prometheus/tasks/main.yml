@@ -1,14 +1,14 @@
 ---
 
 - name: Ensure directory for prometheus config exists
-  become: yes
+  become: true
   file:
     path: /var/data/prometheus
     state: directory
     mode: 0755
 
 - name: Create htpasswd file for basic auth to loki
-  become: yes
+  become: true
   htpasswd:
     path: /var/data/prometheus/.htpasswd
     name: "{{ prometheus.user }}"
@@ -17,7 +17,7 @@
     group: root
 
 - name: Copy prometheus config
-  become: yes
+  become: true
   template:
     src: prometheus.yml.j2
     dest: /var/data/prometheus/prometheus.yml
@@ -25,7 +25,7 @@
   register: prometheus_config
 
 - name: Start prometheus docker container
-  become: yes
+  become: true
   docker_container:
     name: prometheus_01
     image: prom/prometheus:v2.18.1
@@ -44,10 +44,10 @@
   notify: Reload nginx
 
 - name: Restart Prometheus # noqa 503
-  become: yes
+  become: true
   docker_container:
     name: prometheus_01
-    restart: yes
+    restart: true
     state: started
   when:
   - prometheus_config.changed

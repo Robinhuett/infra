@@ -1,7 +1,7 @@
 ---
 
 - name: Start rbnis container
-  become: yes
+  become: true
   docker_container:
     name: rbnis_01
     image: rbnis/rbnis:latest

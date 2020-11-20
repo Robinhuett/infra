@@ -13,28 +13,28 @@
       dest: /tmp/node_exporter-1.0.0-rc.1.linux-amd64.tar.gz
       checksum: sha256:f176f11d27ce5ceeeb7621f3965d6e5ddd0bd840ff3b5964705ee94a71204c1c
       mode: 0777
-    check_mode: no
+    check_mode: false
 
   - name: Extract downloaded node_exporter binary
     unarchive:
       src: /tmp/node_exporter-1.0.0-rc.1.linux-amd64.tar.gz
       dest: /tmp/
-      remote_src: yes
+      remote_src: true
       mode: 0777
-    check_mode: no
+    check_mode: false
 
   - name: Delete downloaded archive
     file:
       path: /tmp/node_exporter-1.0.0-rc.1.linux-amd64.tar.gz
       state: absent
-    check_mode: no
+    check_mode: false
 
   - name: Move node_exporter executable to /usr/bin/
-    become: yes
+    become: true
     copy:
       src: /tmp/node_exporter-1.0.0-rc.1.linux-amd64/node_exporter
       dest: /usr/bin/node_exporter
-      remote_src: yes
+      remote_src: true
       owner: root
       group: root
       mode: 0755
@@ -45,19 +45,19 @@
       state: absent
     when:
     - not node_exporter_bin.stat.exists
-    check_mode: no
+    check_mode: false
 
 - name: Add node_exporter systemd unit
-  become: yes
+  become: true
   copy:
     src: node_exporter.service
     dest: /etc/systemd/system/node_exporter.service
     mode: 0644
 
 - name: Enable node_exporter systemd unit
-  become: yes
+  become: true
   systemd:
     name: node_exporter.service
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true

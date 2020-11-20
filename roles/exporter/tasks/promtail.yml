@@ -13,28 +13,28 @@
       dest: /tmp/promtail-linux-amd64.zip
       checksum: sha256:6695ea8d0c831c0ccab3abfac9e3bdf065e83887d540583b8e28644168ca038c
       mode: 0777
-    check_mode: no
+    check_mode: false
 
   - name: Extract downloaded promtail binary
     unarchive:
       src: /tmp/promtail-linux-amd64.zip
       dest: /tmp/
-      remote_src: yes
+      remote_src: true
       mode: 0777
-    check_mode: no
+    check_mode: false
 
   - name: Delete downloaded archive
     file:
       path: /tmp/promtail-linux-amd64.zip
       state: absent
-    check_mode: no
+    check_mode: false
 
   - name: Move promtail executable to /usr/bin/
-    become: yes
+    become: true
     copy:
       src: /tmp/promtail-linux-amd64
       dest: /usr/bin/promtail
-      remote_src: yes
+      remote_src: true
       owner: root
       group: root
       mode: 0755
@@ -45,17 +45,17 @@
       state: absent
     when:
     - not promtail_bin.stat.exists
-    check_mode: no
+    check_mode: false
 
 - name: Ensure directory for promtail exists
-  become: yes
+  become: true
   file:
     path: /etc/promtail
     state: directory
     mode: 0640
 
 - name: Copy promtail config to target system
-  become: yes
+  become: true
   template:
     src: promtail-config.yml.j2
     dest: /etc/promtail/config.yml
@@ -65,16 +65,16 @@
   notify: Restart promtail
 
 - name: Add promtail systemd unit
-  become: yes
+  become: true
   copy:
     src: promtail.service
     dest: /etc/systemd/system/promtail.service
     mode: 0644
 
 - name: Enable promtail systemd unit
-  become: yes
+  become: true
   systemd:
     name: promtail.service
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true

@@ -62,7 +62,7 @@ domains:
   - name: "*"
   - name: "{{ nextcloud.domain.sub }}"
     csp: "{{ nextcloud.csp }}"
-    skip_dns_config: yes
+    skip_dns_config: true
     nginx_conf: "{{ nextcloud.nginx_conf }}"
   - name: "mta-sts"
     nginx_conf: "{{ mail.mta_sts.nginx }}"

@@ -6,7 +6,7 @@
   - item.1.nginx_conf is defined
 
 - name: Ensure gTLD+1 sites are available
-  become: yes
+  become: true
   template:
     src: nginx-site-apex.j2
     dest: /etc/nginx/sites-available/{{ item.0.apex }}.conf
@@ -20,7 +20,7 @@
     label: "{{ item.0.apex }}"
 
 - name: Ensure subdomain sites are available
-  become: yes
+  become: true
   template:
     src: nginx-site-sub.j2
     dest: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}.conf
@@ -35,7 +35,7 @@
 
 # Skip ansible-lint rule 208 for symlinks til >=4.3.2 is released
 - name: Enable gTLD+1 sites
-  become: yes
+  become: true
   file:
     src: /etc/nginx/sites-available/{{ item.0.apex }}.conf
     dest: /etc/nginx/sites-enabled/{{ item.0.apex }}.conf
@@ -51,7 +51,7 @@
 
 # Skip ansible-lint rule 208 for symlinks til >=4.3.2 is released
 - name: Enable subdomain sites
-  become: yes
+  become: true
   file:
     src: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}.conf
     dest: /etc/nginx/sites-enabled/{{ item.1.name }}.{{ item.0.apex }}.conf

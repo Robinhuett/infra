@@ -1,7 +1,7 @@
 ---
 
 - name: Start watchtower container
-  become: yes
+  become: true
   docker_container:
     name: watchtower_01
     image: containrrr/watchtower:latest
