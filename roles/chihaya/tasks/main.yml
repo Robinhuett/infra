@@ -1,0 +1,57 @@
+---
+
+- name: Ensure directory for chihaya exists
+  become: true
+  file:
+    path: /var/data/chihaya
+    state: directory
+    mode: 0755
+
+- name: Copy chihaya config
+  become: true
+  template:
+    src: config.yaml.j2
+    dest: /var/data/chihaya/config.yaml
+    mode: 0644
+
+- name: Start container
+  become: true
+  docker_container:
+    name: chihaya_01
+    image: quay.io/jzelinskie/chihaya-git:latest
+    published_ports:
+    - 127.0.0.1:6880:6880
+    - 127.0.0.1:6969:6969
+    volumes:
+    - /var/data/chihaya/config.yaml:/etc/chihaya.yaml:ro
+    log_driver: loki
+    log_options:
+      loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
+      loki-retries: "5"
+      loki-batch-size: "400"
+    restart_policy: always
+    state: started
+
+- name: Add scrapeconfig for chihaya to prometheus
+  delegate_to: "{{ groups['monitoring'][0] }}"
+  become: true
+  blockinfile:
+    path: /var/data/prometheus/prometheus.yml
+    insertafter: "# Here could be your scrape_config"
+    marker: "# Managed by ansible --- Chihaya"
+    block: |
+      - job_name: 'chihaya'
+        scrape_interval: 5s
+        static_configs:
+      - targets: ['{{ chihaya.domain.sub }}{{ chihaya.domain.apex }}:6881']
+  register: prometheus_config
+
+- name: Restart Prometheus # noqa 503
+  delegate_to: "{{ groups['monitoring'][0] }}"
+  become: true
+  docker_container:
+    name: prometheus_01
+    restart: true
+    state: started
+  when:
+  - prometheus_config.changed
