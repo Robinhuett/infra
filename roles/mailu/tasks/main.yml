@@ -1,10 +1,10 @@
 ---
 
 - name: Remove conflicting packages
-  become: yes
+  become: true
   apt:
-    autoremove: yes
-    purge: yes
+    autoremove: true
+    purge: true
     name:
     - exim4
     - exim4-base
@@ -13,14 +13,14 @@
   - dependencies
 
 - name: Ensure directory for mailu exists
-  become: yes
+  become: true
   file:
     path: /var/data/mailu
     state: directory
     mode: 0755
 
 - name: Make sure mailu.env file is present
-  become: yes
+  become: true
   template:
     src: mailu.env.j2
     dest: /var/data/mailu.env
@@ -28,17 +28,17 @@
   register: mailu_env
 
 - name: Create docker network for mailu
-  become: yes
+  become: true
   docker_network:
     name: mailu
     driver: bridge
-    enable_ipv6: yes
+    enable_ipv6: true
     ipam_config:
     - subnet: 192.168.203.0/24
     - subnet: fd30:97e2:811b:beef::/64
 
 - name: Start ipv6nat container to enable sane IPv6 in docker # Yes I know IPv6 NAT is bad yada yada yada..
-  become: yes
+  become: true
   docker_container:
     name: ipv6nat_01
     image: robbertkl/ipv6nat
@@ -46,7 +46,7 @@
     - /var/run/docker.sock:/var/run/docker.sock:ro
     - /etc/localtime:/etc/localtime:ro
     network_mode: host
-    privileged: yes
+    privileged: true
     restart_policy: always
     state: started
   when:
@@ -54,7 +54,7 @@
 
 # networks_cli_compatible is set because auf deprecation in ansible 2.12 and not needed after this
 - name: Start redis container
-  become: yes
+  become: true
   docker_container:
     name: redis
     image: redis:alpine
@@ -63,7 +63,7 @@
     - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     log_driver: loki
     log_options:
       loki-url: https://{{ loki.user }}:{{ loki.pass }}@{{ loki.domain.sub }}.{{ loki.domain.apex }}/loki/api/v1/push
@@ -75,7 +75,7 @@
   - not ansible_check_mode
 
 - name: Start mailu admin container
-  become: yes
+  become: true
   docker_container:
     name: admin
     image: mailu/admin:{{ mailu.version }}
@@ -85,7 +85,7 @@
     - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     env_file: /var/data/mailu.env
     log_driver: loki
     log_options:
@@ -98,7 +98,7 @@
   - not ansible_check_mode
 
 - name: Start mailu imap container
-  become: yes
+  become: true
   docker_container:
     name: imap
     image: mailu/dovecot:{{ mailu.version }}
@@ -108,7 +108,7 @@
     - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     env_file: /var/data/mailu.env
     log_driver: loki
     log_options:
@@ -121,7 +121,7 @@
   - not ansible_check_mode
 
 - name: Start mailu smtp container
-  become: yes
+  become: true
   docker_container:
     name: smtp
     image: mailu/postfix:{{ mailu.version }}
@@ -131,7 +131,7 @@
     - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     env_file: /var/data/mailu.env
     log_driver: loki
     log_options:
@@ -144,7 +144,7 @@
   - not ansible_check_mode
 
 - name: Start mailu antispam container
-  become: yes
+  become: true
   docker_container:
     name: antispam
     image: mailu/rspamd:{{ mailu.version }}
@@ -155,7 +155,7 @@
     - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     env_file: /var/data/mailu.env
     log_driver: loki
     log_options:
@@ -168,7 +168,7 @@
   - not ansible_check_mode
 
 - name: Start mailu webdav container
-  become: yes
+  become: true
   docker_container:
     name: webdav
     image: mailu/radicale:{{ mailu.version }}
@@ -177,7 +177,7 @@
     - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     env_file: /var/data/mailu.env
     log_driver: loki
     log_options:
@@ -190,7 +190,7 @@
   - not ansible_check_mode
 
 - name: Start mailu fetchmail container
-  become: yes
+  become: true
   docker_container:
     name: fetchmail
     image: mailu/fetchmail:{{ mailu.version }}
@@ -198,7 +198,7 @@
     - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     env_file: /var/data/mailu.env
     log_driver: loki
     log_options:
@@ -211,7 +211,7 @@
   - not ansible_check_mode
 
 - name: Start mailu webmail container
-  become: yes
+  become: true
   docker_container:
     name: webmail
     image: mailu/rainloop:{{ mailu.version }}
@@ -220,7 +220,7 @@
     - /etc/localtime:/etc/localtime:ro
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     env_file: /var/data/mailu.env
     log_driver: loki
     log_options:
@@ -233,7 +233,7 @@
   - not ansible_check_mode
 
 - name: Start front service container
-  become: yes
+  become: true
   docker_container:
     name: front
     image: mailu/nginx:{{ mailu.version }}
@@ -253,7 +253,7 @@
     - "993:993"
     networks:
     - name: mailu
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     env_file: /var/data/mailu.env
     log_driver: loki
     log_options:
@@ -266,12 +266,12 @@
   - not ansible_check_mode
 
 - name: Setup noreply mail user # noqa 301
-  become: yes
+  become: true
   command: docker exec admin flask mailu user {{ mail.user.noreply.name }} {{ mail.domain.apex }} '{{ mail.user.noreply.pass }}'
   register: noreply_user
   changed_when: noreply_user.rc == 0
-  ignore_errors: yes
-  no_log: yes
+  ignore_errors: true
+  no_log: true
 
 - name: Ensure all MX DNS records are set
   inwx.collection.dns:
@@ -280,7 +280,7 @@
     priority: 10
     value: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
     ttl: 86400
-    solo: yes
+    solo: true
     state: present
     username: "{{ inwx_user }}"
     password: "{{ inwx_pass }}"
@@ -308,7 +308,7 @@
     record: _dmarc
     value: v=DMARC1; p=reject; rua=mailto:postmaster@{{ mail.domain.apex }}; ruf=mailto:postmaster@{{ mail.domain.apex }}; adkim=s; aspf=s
     ttl: 3600
-    solo: yes
+    solo: true
     state: present
     username: "{{ inwx_user }}"
     password: "{{ inwx_pass }}"
@@ -323,7 +323,7 @@
     record: autodiscover
     value: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
     ttl: 3600
-    solo: yes
+    solo: true
     state: present
     username: "{{ inwx_user }}"
     password: "{{ inwx_pass }}"
@@ -338,7 +338,7 @@
     record: autoconfig
     value: "{{ mail.domain.sub }}.{{ mail.domain.apex }}"
     ttl: 3600
-    solo: yes
+    solo: true
     state: present
     username: "{{ inwx_user }}"
     password: "{{ inwx_pass }}"
@@ -356,7 +356,7 @@
     record: _smtp._tls
     value: "v=TLSRPTv1; rua=mailto:postmaster@{{ mail.domain.apex }};"
     ttl: 3600
-    solo: yes
+    solo: true
     state: present
     username: "{{ inwx_user }}"
     password: "{{ inwx_pass }}"
@@ -371,7 +371,7 @@
     record: _mta-sts
     value: "{{ mail.mta_sts.version }}"
     ttl: 3600
-    solo: yes
+    solo: true
     state: present
     username: "{{ inwx_user }}"
     password: "{{ inwx_pass }}"

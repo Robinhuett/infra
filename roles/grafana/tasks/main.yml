@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure directory for grafana exists
-  become: yes
+  become: true
   file:
     path: /var/data/grafana
     owner: "472"
@@ -9,7 +9,7 @@
     mode: 0755
 
 - name: Start grafana docker container
-  become: yes
+  become: true
   docker_container:
     name: grafana_01
     image: grafana/grafana:7.0.1

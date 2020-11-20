@@ -1,7 +1,7 @@
 ---
 
 - name: Restart promtail
-  become: yes
+  become: true
   service:
     name: promtail.service
     state: restarted

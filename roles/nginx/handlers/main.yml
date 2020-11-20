@@ -5,13 +5,13 @@
   changed_when: false
 
 - name: Reload nginx
-  become: yes
+  become: true
   service:
     name: nginx
     state: reloaded
 
 - name: Restart nginx
-  become: yes
+  become: true
   service:
     name: nginx
     state: restarted

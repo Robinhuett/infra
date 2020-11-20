@@ -1,62 +1,62 @@
 ---
 
 - name: Ensure locale en_US.UTF-8 locale is present
-  become: yes
+  become: true
   locale_gen:
     name: en_US.UTF-8
     state: present
 
 - name: Ensure the timezone is set to Europe/Berlin
-  become: yes
+  become: true
   timezone:
     name: Europe/Berlin
 
 - name: Update apt cache
-  become: yes
+  become: true
   apt:
-    update_cache: yes
+    update_cache: true
 
 - name: Upgrade all packages
-  become: yes
+  become: true
   apt:
-    upgrade: yes
+    upgrade: true
 
 - name: Autoremove not needed packages
-  become: yes
+  become: true
   apt:
-    autoremove: yes
+    autoremove: true
 
 - name: Install common packages
-  become: yes
+  become: true
   apt:
     name:
     - unzip
     - tmux
     state: present
-  check_mode: no
+  check_mode: false
 
 - name: Ensure pip3 is available
-  become: yes
+  become: true
   apt:
     name:
     - python3
     - python3-pip
     state: present
-  check_mode: no
+  check_mode: false
 
 - name: Install python-apt to check for installed packages
   pip:
     name: python-apt
-  check_mode: no
+  check_mode: false
 
 - name: Make sure the group 'wheel' exists
-  become: yes
+  become: true
   group:
     name: wheel
     state: present
 
 - name: Allow the group 'wheel' to use sudo without password
-  become: yes
+  become: true
   lineinfile:
     dest: /etc/sudoers
     state: present
@@ -66,18 +66,18 @@
     mode: 0440
 
 - name: Manage additional users
-  become: yes
+  become: true
   user:
     name: "{{ item.name }}"
     shell: "/bin/bash"
     groups: wheel
-    append: yes
+    append: true
   loop: "{{ users }}"
 
 - name: Manage SSH Keys for additional Users
-  become: yes
+  become: true
   authorized_key:
     user: "{{ item.name }}"
     key: "{{ item.key }}"
-    exclusive: yes
+    exclusive: true
   loop: "{{ users }}"

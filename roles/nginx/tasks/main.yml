@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure nginx is installed
-  become: yes
+  become: true
   apt:
     name:
     - nginx
@@ -9,10 +9,10 @@
     - openssl
     - python3-passlib
     state: present
-  check_mode: no
+  check_mode: false
 
 - name: Generate DH Parameters
-  become: yes
+  become: true
   openssl_dhparam:
     path: /etc/ssl/certs/dhparam.pem
     size: 2048
@@ -20,7 +20,7 @@
   - env != "dev"
 
 - name: Ensure directory for acme challange exists
-  become: yes
+  become: true
   file:
     path: /var/lib/letsencrypt/.well-known
     group: www-data
@@ -28,7 +28,7 @@
     state: directory
 
 - name: Copy letsencrypt snippet
-  become: yes
+  become: true
   copy:
     src: letsencrypt.conf
     dest: /etc/nginx/snippets/letsencrypt.conf
@@ -37,7 +37,7 @@
     mode: '0644'
 
 - name: Copy ssl snippet
-  become: yes
+  become: true
   copy:
     src: ssl.conf
     dest: /etc/nginx/snippets/ssl.conf
@@ -46,7 +46,7 @@
     mode: '0644'
 
 - name: Copy header snippet
-  become: yes
+  become: true
   copy:
     src: header.conf
     dest: /etc/nginx/snippets/header.conf
@@ -55,21 +55,21 @@
     mode: '0644'
 
 - name: Remove default nginx vhost config file
-  become: yes
+  become: true
   file:
     path: /etc/nginx/sites-enabled/default
     state: absent
   notify: Restart nginx
 
 - name: Ensure nginx service is running and enabled
-  become: yes
+  become: true
   service:
     name: nginx
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Ensure cron job exists to renew letsencrypt certs
-  become: yes
+  become: true
   cron:
     name: Renew letsencrypt certs
     minute: '0'

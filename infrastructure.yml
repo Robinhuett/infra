@@ -4,7 +4,7 @@
   - hetzner
 
   connection: local
-  gather_facts: no
+  gather_facts: false
 
   tasks:
   - name: Ensure hcloud-python is installed
@@ -33,7 +33,7 @@
       record: "{{ item.1.name }}"
       value: "{{ hetznernode.hcloud_server.ipv4_address }}"
       ttl: 3600
-      solo: yes
+      solo: true
       state: present
       username: "{{ inwx_user }}"
       password: "{{ inwx_pass }}"
@@ -52,7 +52,7 @@
       record: "www"
       value: "{{ item.0.apex }}"
       ttl: 3600
-      solo: yes
+      solo: true
       state: present
       username: "{{ inwx_user }}"
       password: "{{ inwx_pass }}"
@@ -125,7 +125,7 @@
       record: "{{ item.1.name }}"
       value: "{{ ansible_default_ipv6.address }}"
       ttl: 3600
-      solo: yes
+      solo: true
       state: present
       username: "{{ inwx_user }}"
       password: "{{ inwx_pass }}"

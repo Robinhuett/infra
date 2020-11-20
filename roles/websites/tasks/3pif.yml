@@ -1,7 +1,7 @@
 ---
 
 - name: Start 3pif-web container
-  become: yes
+  become: true
   docker_container:
     name: 3pif-web_01
     image: rbnis/3pif-web:latest

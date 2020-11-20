@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure directory for loki exists
-  become: yes
+  become: true
   file:
     path: /var/data/loki
     owner: "10001"
@@ -9,7 +9,7 @@
     mode: 0755
 
 - name: Create htpasswd file for basic auth to loki
-  become: yes
+  become: true
   htpasswd:
     path: /var/data/loki/.htpasswd
     name: "{{ loki.user }}"
@@ -18,7 +18,7 @@
     group: root
 
 - name: Copy loki config to target system
-  become: yes
+  become: true
   copy:
     src: config.yml
     dest: /var/data/loki/config.yml
@@ -27,7 +27,7 @@
     mode: 0644
 
 - name: Start loki docker container
-  become: yes
+  become: true
   docker_container:
     name: loki_01
     image: grafana/loki:1.5.0

@@ -1,14 +1,14 @@
 ---
 
 - name: Ensure directory for db exists
-  become: yes
+  become: true
   file:
     path: /var/data/nextcloud/db
     state: directory
     mode: 0755
 
 - name: Start nextcloud db container
-  become: yes
+  become: true
   docker_container:
     name: nextcloud_db_01
     image: postgres:12
@@ -27,14 +27,14 @@
     state: started
 
 - name: Ensure directory for nextcloud files exists
-  become: yes
+  become: true
   file:
     path: /var/data/nextcloud/app
     state: directory
     mode: 0755
 
 - name: Start nextcloud app container
-  become: yes
+  become: true
   docker_container:
     name: nextcloud_app_01
     image: nextcloud:latest

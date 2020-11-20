@@ -1,20 +1,20 @@
 ---
 
 - name: Install borgbackup
-  become: yes
+  become: true
   apt:
     name:
     - borgbackup
 
 - name: Install borgmatic
-  become: yes
+  become: true
   become_user: root
   pip:
     name:
     - borgmatic
 
 - name: Ensure /etc/borgmatic exits
-  become: yes
+  become: true
   file:
     path: /etc/borgmatic
     state: directory
@@ -22,31 +22,31 @@
     owner: root
 
 - name: Add Repokey
-  become: yes
+  become: true
   template:
     src: key.j2
     dest: /etc/borgmatic/key
     mode: 0600
 
 - name: Add borgmatic config
-  become: yes
+  become: true
   template:
     src: config.yaml.j2
     dest: /etc/borgmatic/config.yaml
     mode: 0600
 
 - name: Add rsync.net host to known_hosts
-  become: yes
+  become: true
   become_user: root
   known_hosts:
     name: "{{ borg.host }}"
     key: "{{ borg.host_key }}"
 
 - name: Ensure that root has a ssh key
-  become: yes
+  become: true
   user:
     name: root
-    generate_ssh_key: yes
+    generate_ssh_key: true
   register: root_user
 
 - name: Get the ssh public key of root
@@ -58,15 +58,15 @@
     name: "{{ borg.host }}"
     key: "{{ borg.host_key }}"
   delegate_to: localhost
-  run_once: yes
+  run_once: true
 
 - name: Get current ssh keys
   command: ssh {{ borg.user }}@{{ borg.host }} 'cat .ssh/authorized_keys'
   delegate_to: localhost
-  run_once: yes
+  run_once: true
   changed_when: False
   register: current_ssh_public_keys
-  no_log: yes
+  no_log: true
 
 - name: Add public key to rysnc.net account
   shell: set -o pipefail && echo '{{ item.key }}' | ssh {{ borg.user }}@{{ borg.host }} 'dd of=.ssh/authorized_keys oflag=append conv=notrunc'
@@ -80,10 +80,10 @@
   - item.key is defined
   - item.key not in current_ssh_public_keys.stdout
   delegate_to: localhost
-  run_once: yes
+  run_once: true
 
 - name: Initiallize borg repo
-  become: yes
+  become: true
   become_user: root
   command:
     cmd: borgmatic init --encryption repokey
@@ -91,7 +91,7 @@
   changed_when: borg_repo_init.stdout | length > 0
 
 - name: Add borgmatic systemd units
-  become: yes
+  become: true
   template:
     src: "{{ item }}.j2"
     dest: /etc/systemd/system/{{ item }}
@@ -104,9 +104,9 @@
     exec_time_minute: "{{ 59 | random(seed=inventory_hostname) }}"
 
 - name: Enable borgmatic systemd timer
-  become: yes
+  become: true
   systemd:
     name: borgmatic.timer
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
