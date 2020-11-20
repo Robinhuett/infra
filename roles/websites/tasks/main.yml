@@ -9,7 +9,7 @@
   become: true
   template:
     src: nginx-site-apex.j2
-    dest: /etc/nginx/sites-available/{{ item.0.apex }}.conf
+    dest: /etc/nginx/sites-available/{{ item.0.apex }}{{ item.1.port | default('') }}.conf
     mode: 0644
   loop: "{{ domains|subelements('subs') }}"
   when:
@@ -23,7 +23,7 @@
   become: true
   template:
     src: nginx-site-sub.j2
-    dest: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}.conf
+    dest: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}{{ item.1.port | default('') }}.conf
     mode: 0644
   loop: "{{ domains|subelements('subs') }}"
   when:
@@ -37,8 +37,8 @@
 - name: Enable gTLD+1 sites
   become: true
   file:
-    src: /etc/nginx/sites-available/{{ item.0.apex }}.conf
-    dest: /etc/nginx/sites-enabled/{{ item.0.apex }}.conf
+    src: /etc/nginx/sites-available/{{ item.0.apex }}{{ item.1.port | default('') }}.conf
+    dest: /etc/nginx/sites-enabled/{{ item.0.apex }}{{ item.1.port | default('') }}.conf
     state: link # noqa 208
   loop: "{{ domains|subelements('subs') }}"
   when:
@@ -53,8 +53,8 @@
 - name: Enable subdomain sites
   become: true
   file:
-    src: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}.conf
-    dest: /etc/nginx/sites-enabled/{{ item.1.name }}.{{ item.0.apex }}.conf
+    src: /etc/nginx/sites-available/{{ item.1.name }}.{{ item.0.apex }}{{ item.1.port | default('') }}.conf
+    dest: /etc/nginx/sites-enabled/{{ item.1.name }}.{{ item.0.apex }}{{ item.1.port | default('') }}.conf
     state: link # noqa 208
   loop: "{{ domains|subelements('subs') }}"
   when:

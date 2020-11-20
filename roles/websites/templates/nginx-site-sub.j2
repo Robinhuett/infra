@@ -1,6 +1,6 @@
 server {
-  listen 80;
-  listen [::]:80;
+  listen {{ item.1.port | default(80) }};
+  listen [::]:{{ item.1.port | default(80) }};
   server_name {{ item.1.name }}.{{ item.0.apex }};
 
   include snippets/header.conf;
@@ -22,8 +22,8 @@ server {
 
 {% if env != "dev" %}
 server {
-  listen 443 ssl http2;
-  listen [::]:443 ssl http2;
+  listen {{ item.1.port | default(443) }} ssl http2;
+  listen [::]:{{ item.1.port | default(443) }} ssl http2;
   server_name {{ item.1.name }}.{{ item.0.apex }};
 
   if ($scheme != "https") {
