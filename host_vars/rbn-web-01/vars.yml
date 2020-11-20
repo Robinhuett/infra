@@ -19,6 +19,12 @@ nextcloud:
     user: "{{ vault_nextcloud_admin_user }}"
     pass: "{{ vault_nextcloud_admin_pass }}"
 
+chihaya:
+  domain:
+    apex: rbn.is
+    sub: tracker
+  hmac_key: "{{ vault_chihaya_hmac_key }}"
+
 domains:
 - apex: tripp.xyz
   subs:
@@ -66,3 +72,17 @@ domains:
     nginx_conf: "{{ nextcloud.nginx_conf }}"
   - name: "mta-sts"
     nginx_conf: "{{ mail.mta_sts.nginx }}"
+  - name: "{{ chihaya.domain.sub }}"
+    skip_dns_config: true
+    port: 6969
+    nginx_conf: |
+      location / {
+        proxy_pass http://localhost:6969;
+      }
+  - name: "{{ chihaya.domain.sub }}"
+    skip_dns_config: true
+    port: 6880
+    nginx_conf: |
+      location / {
+        proxy_pass http://localhost:6880;
+      }

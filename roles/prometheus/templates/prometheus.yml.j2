@@ -17,3 +17,4 @@ scrape_configs:
 {% for host in groups['all'] %}
   - targets: ['{{ hostvars[host].ansible_host }}:9100']
 {% endfor %}
+# Here could be your scrape_config

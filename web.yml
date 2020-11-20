@@ -10,3 +10,5 @@
   - websites
   - role: nextcloud
     when: nextcloud is defined
+  - role: chihaya
+    when: chihaya is defined
