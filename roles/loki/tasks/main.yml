@@ -16,6 +16,7 @@
     password: "{{ loki.pass }}"
     owner: root
     group: root
+    mode: 0600
 
 - name: Copy loki config to target system
   become: true

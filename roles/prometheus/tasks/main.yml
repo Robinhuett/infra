@@ -15,6 +15,7 @@
     password: "{{ prometheus.pass }}"
     owner: root
     group: root
+    mode: 0600
 
 - name: Copy prometheus config
   become: true
