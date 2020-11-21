@@ -34,6 +34,7 @@
 - Filesharing with [Nextcloud](https://nextcloud.com/)
 - Backups with [Borgbackup](https://www.borgbackup.org/) to [rsync.net](https://rsync.net)
 - Log aggregation with [Grafana Loki](https://grafana.com/oss/loki/)
+- Torrent Tracker with [chihaya](https://github.com/chihaya/chihaya)
 - Some of my own stuff
 
 ## Features for Future
