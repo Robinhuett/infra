@@ -77,12 +77,12 @@ domains:
     port: 6969
     nginx_conf: |
       location / {
-        proxy_pass http://localhost:6969;
+        proxy_pass http://localhost:6505;
       }
   - name: "{{ chihaya.domain.sub }}"
     skip_dns_config: true
     port: 6880
     nginx_conf: |
       location / {
-        proxy_pass http://localhost:6880;
+        proxy_pass http://localhost:6504;
       }

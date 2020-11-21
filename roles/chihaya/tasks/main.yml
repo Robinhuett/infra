@@ -20,8 +20,8 @@
     name: chihaya_01
     image: quay.io/jzelinskie/chihaya-git:latest
     published_ports:
-    - 127.0.0.1:6880:6880
-    - 127.0.0.1:6969:6969
+    - 127.0.0.1:6504:6880
+    - 127.0.0.1:6505:6969
     volumes:
     - /var/data/chihaya/config.yaml:/etc/chihaya.yaml:ro
     log_driver: loki
@@ -43,7 +43,7 @@
       - job_name: 'chihaya'
         scrape_interval: 5s
         static_configs:
-      - targets: ['{{ chihaya.domain.sub }}{{ chihaya.domain.apex }}:6881']
+        - targets: ['{{ chihaya.domain.sub }}.{{ chihaya.domain.apex }}:6880']
   register: prometheus_config
 
 - name: Restart Prometheus # noqa 503
